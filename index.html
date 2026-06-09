@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lexicon — Vocabulary Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:           #F5F2ED;
+      --surface:      #FDFBF8;
+      --surface-alt:  #EDE9E2;
+      --border:       #DDD8CF;
+      --text-primary: #1A1714;
+      --text-secondary:#6B655C;
+      --text-muted:   #9E9890;
+      --accent:       #C4633A;
+      --accent-light: #F0E0D6;
+      --accent-dark:  #9E4A26;
+
+      --lvl0-hue: #8C8273; --lvl0-bg: #EAE6DF;
+      --lvl1-hue: #4A8C6F; --lvl1-bg: #E8F3EE;
+      --lvl2-hue: #5B7FA6; --lvl2-bg: #E5EEF6;
+      --lvl3-hue: #9B7DC4; --lvl3-bg: #EFE9F8;
+      --lvl4-hue: #C49B3A; --lvl4-bg: #F8F1E0;
+      --lvl5-hue: #C45C5C; --lvl5-bg: #F8E8E8;
+      --lvl6-hue: #5C5CC4; --lvl6-bg: #E8E8F8; /* New for Mastered/Archive */
+
+      --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:  0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
+      --shadow-lg:  0 16px 48px rgba(0,0,0,0.14), 0 6px 18px rgba(0,0,0,0.08);
+      --shadow-xl:  0 32px 80px rgba(0,0,0,0.2),  0 12px 32px rgba(0,0,0,0.1);
+
+      --radius-sm: 6px; --radius-md: 12px; --radius-lg: 20px; --radius-xl: 28px;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg:           #141210;
+      --surface:      #1E1A17;
+      --surface-alt:  #2C2621;
+      --border:       #3A332C;
+      --text-primary: #F5F2ED;
+      --text-secondary:#BDB8AF;
+      --text-muted:   #8A847C;
+      --lvl0-bg: rgba(140,130,115,0.15);
+      --lvl1-bg: rgba(74,140,111,0.15);
+      --lvl2-bg: rgba(91,127,166,0.15);
+      --lvl3-bg: rgba(155,125,196,0.15);
+      --lvl4-bg: rgba(196,155,58,0.15);
+      --lvl5-bg: rgba(196,92,92,0.15);
+      --lvl6-bg: rgba(92,92,196,0.15);
+    }
+
+    [data-theme="amoled"] {
+      --bg:           #000000;
+      --surface:      #0A0A0A;
+      --surface-alt:  #161616;
+      --border:       #222222;
+      --text-primary: #FFFFFF;
+      --text-secondary:#AAAAAA;
+      --text-muted:   #666666;
+      --lvl0-bg: rgba(140,130,115,0.1);
+      --lvl1-bg: rgba(74,140,111,0.1);
+      --lvl2-bg: rgba(91,127,166,0.1);
+      --lvl3-bg: rgba(155,125,196,0.1);
+      --lvl4-bg: rgba(196,155,58,0.1);
+      --lvl5-bg: rgba(196,92,92,0.1);
+      --lvl6-bg: rgba(92,92,196,0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body { background-color: var(--bg); color: var(--text-primary); font-family: var(--font-body); line-height: 1.6; min-height: 100vh; transition: background-color var(--transition), color var(--transition); }
+
+    /* ── HEADER ── */
+    .app-header { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 68px; display: flex; align-items: center; justify-content: space-between; }
+    .header-left { display: flex; align-items: baseline; gap: 0.5rem; }
+    .app-title { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
+    .app-subtitle { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .header-right { display: flex; align-items: center; gap: 0.75rem; }
+    .word-count-badge { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); background: var(--surface-alt); border: 1px solid var(--border); padding: 4px 10px; border-radius: 99px; display: none; }
+    .btn-icon, .btn-quiz { cursor: pointer; transition: var(--transition); }
+    .btn-icon { background: transparent; border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 1.1rem; padding: 6px 10px; display: flex; align-items: center; justify-content: center; }
+    .btn-icon:hover { background: var(--surface-alt); color: var(--text-primary); transform: translateY(-1px); }
+    .btn-quiz { display: flex; align-items: center; gap: 0.4rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); font-family: var(--font-body); font-size: 0.82rem; font-weight: 500; padding: 8px 14px; border-radius: var(--radius-md); }
+    .btn-quiz:hover { background: var(--surface-alt); color: var(--text-primary); transform: translateY(-1px); }
+    
+    /* ── FLOATING ACTION BUTTON (Add Word) ── */
+    .fab-add { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent); border: none; color: #fff; box-shadow: 0 4px 14px rgba(196,99,58,0.4); display: flex; align-items: center; justify-content: center; z-index: 90; cursor: pointer; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s; }
+    .fab-add:hover { background: var(--accent-dark); transform: scale(1.05) rotate(90deg); }
+
+    /* ── MODALS ── */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .modal-backdrop.is-open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--surface); border-radius: var(--radius-xl); padding: 2rem; width: 100%; max-width: 460px; box-shadow: var(--shadow-xl); border: 1px solid var(--border); transform: translateY(20px) scale(0.97); transition: transform 0.3s, opacity 0.3s; opacity: 0; max-height: 90vh; overflow-y: auto; }
+    .modal-backdrop.is-open .modal { transform: translateY(0) scale(1); opacity: 1; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .modal-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; }
+    .btn-modal-close { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-alt); border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .btn-modal-close:hover { background: var(--border); color: var(--text-primary); }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); margin-bottom: 0.4rem; }
+    .form-label-hint { font-size: 0.65rem; color: var(--text-muted); text-transform: none; letter-spacing: normal; font-weight: 400; }
+    .input-with-button { display: flex; gap: 0.5rem; }
+    .form-input, .form-textarea { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 14px; font-family: var(--font-body); font-size: 0.95rem; color: var(--text-primary); transition: var(--transition); outline: none; }
+    .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+    .form-textarea { resize: vertical; min-height: 120px; }
+    .field-wrap { position: relative; }
+    .field-wrap .form-input { padding-right: 32px; }
+    .field-wrap .form-textarea { padding-right: 32px; }
+    .field-clear { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.85rem; line-height: 1; padding: 2px 4px; border-radius: 50%; transition: var(--transition); display: none; }
+    .field-wrap.has-value .field-clear { display: block; }
+    .field-clear:hover { color: var(--text-primary); background: var(--surface-alt); }
+    .field-wrap--textarea .field-clear { top: 10px; transform: none; }
+    .btn-fetch { background: var(--surface-alt); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 0 14px; cursor: pointer; transition: var(--transition); color: var(--text-secondary); font-family: var(--font-body); font-weight: 600; font-size: 0.8rem; white-space: nowrap; display: flex; align-items: center; gap: 0.3rem; }
+    .btn-fetch:hover:not(:disabled) { background: var(--border); color: var(--text-primary); }
+    .btn-fetch:disabled { opacity: 0.6; cursor: not-allowed; }
+    .level-picker { display: flex; gap: 0.5rem; }
+    .level-btn { flex: 1; height: 38px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; font-family: var(--font-body); font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); transition: var(--transition); }
+    .level-btn:hover { background: var(--surface-alt); }
+    .level-btn[data-lvl="1"].selected { background: var(--lvl1-bg); border-color: var(--lvl1-hue); color: var(--lvl1-hue); }
+    .level-btn[data-lvl="2"].selected { background: var(--lvl2-bg); border-color: var(--lvl2-hue); color: var(--lvl2-hue); }
+    .level-btn[data-lvl="3"].selected { background: var(--lvl3-bg); border-color: var(--lvl3-hue); color: var(--lvl3-hue); }
+    .level-btn[data-lvl="4"].selected { background: var(--lvl4-bg); border-color: var(--lvl4-hue); color: var(--lvl4-hue); }
+    .level-btn[data-lvl="5"].selected { background: var(--lvl5-bg); border-color: var(--lvl5-hue); color: var(--lvl5-hue); }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.75rem; }
+    .btn-cancel, .btn-save, .btn-primary { height: 44px; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; transition: var(--transition); }
+    .btn-cancel { flex: 1; background: transparent; border: 1.5px solid var(--border); font-weight: 500; color: var(--text-secondary); }
+    .btn-cancel:hover { background: var(--surface-alt); color: var(--text-primary); }
+    .btn-save, .btn-primary { flex: 2; background: var(--accent); border: none; font-weight: 600; color: #fff; }
+    .btn-save:hover, .btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .settings-option { background: var(--bg); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .settings-option p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+    .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
+
+    /* ── SEARCH BAR ── */
+    .search-bar-wrap { padding: 0 2rem; max-width: 1400px; margin: 1.5rem auto 0; }
+    .search-bar { display: flex; align-items: center; gap: 0.6rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 10px 16px; transition: var(--transition); }
+    .search-bar:focus-within { border-color: var(--accent); }
+    .search-icon { color: var(--text-muted); flex-shrink: 0; }
+    .search-input { flex: 1; background: transparent; border: none; outline: none; font-family: var(--font-body); font-size: 0.95rem; color: var(--text-primary); width: 100%; }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-clear { background: transparent; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem; padding: 0; display: none; }
+    .search-clear.visible { display: block; }
+    .search-results-overlay { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; margin-top: 0.5rem; display: none; box-shadow: var(--shadow-md); position: absolute; left: 2rem; right: 2rem; max-width: 1360px; z-index: 50; }
+    .search-results-overlay.visible { display: block; }
+    .search-result-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.65rem 0.5rem; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); }
+    .search-result-item:hover { background: var(--surface-alt); }
+    .search-result-word { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; }
+    .search-result-def { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; margin-top: 2px; }
+    .search-result-level { font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; flex-shrink: 0; margin-top: 2px; }
+    .search-no-results { text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem; }
+
+    /* ── WORD OF THE DAY ── */
+    .wotd-banner { max-width: 1400px; margin: 1rem 2rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.4rem; display: flex; align-items: center; gap: 1rem; overflow: hidden; position: relative; }
+    .wotd-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--accent-light) 0%, transparent 60%); opacity: 0.4; pointer-events: none; }
+    .wotd-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .wotd-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 2px; }
+    .wotd-word { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+    .wotd-def { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin-top: 2px; }
+    .wotd-meta { display: flex; gap: 0.5rem; align-items: center; margin-left: auto; flex-shrink: 0; }
+    .wotd-level-badge { font-size: 0.65rem; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
+    .wotd-refresh { background: transparent; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem; padding: 4px; border-radius: var(--radius-sm); transition: var(--transition); }
+    .wotd-refresh:hover { color: var(--accent); transform: rotate(180deg); }
+
+    /* ── DASHBOARD ── */
+    .dashboard { padding: 1.5rem 2rem 5rem; max-width: 1400px; margin: 0 auto; }
+    .dashboard-meta { margin-bottom: 1.5rem; margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; }
+    .dashboard-heading { font-family: var(--font-display); font-size: 1rem; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.03em; }
+    .dashboard-tabs { display: flex; gap: 0.5rem; background: var(--surface-alt); padding: 6px; border-radius: var(--radius-md); border: 1px solid var(--border); max-width: 750px; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
+    .dash-tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 60px; }
+    .dash-tab-btn:hover { background: var(--border); color: var(--text-primary); }
+    .dash-tab-btn[data-tab="0"].active { background: var(--lvl0-bg); color: var(--lvl0-hue); }
+    .dash-tab-btn[data-tab="1"].active { background: var(--lvl1-bg); color: var(--lvl1-hue); }
+    .dash-tab-btn[data-tab="2"].active { background: var(--lvl2-bg); color: var(--lvl2-hue); }
+    .dash-tab-btn[data-tab="3"].active { background: var(--lvl3-bg); color: var(--lvl3-hue); }
+    .dash-tab-btn[data-tab="4"].active { background: var(--lvl4-bg); color: var(--lvl4-hue); }
+    .dash-tab-btn[data-tab="5"].active { background: var(--lvl5-bg); color: var(--lvl5-hue); }
+    .dash-tab-btn[data-tab="6"].active { background: var(--lvl6-bg); color: var(--lvl6-hue); } /* Mastered/Archive */
+    .dash-tab-count { font-size: 0.7rem; opacity: 0.7; }
+    .level-grid.single-view { display: grid; grid-template-columns: 1fr !important; max-width: 600px; margin: 0 auto; overflow: hidden; touch-action: pan-y; }
+    .level-grid.single-view .level-column { display: none; min-height: 400px; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); flex-direction: column; }
+    .level-grid.single-view .level-column.active-view { display: flex; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .column-header { padding: 1rem 1.1rem 0.8rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .column-header-left { display: flex; align-items: center; gap: 0.55rem; }
+    .level-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .level-column[data-level="0"] .level-dot { background: var(--lvl0-hue); }
+    .level-column[data-level="1"] .level-dot { background: var(--lvl1-hue); }
+    .level-column[data-level="2"] .level-dot { background: var(--lvl2-hue); }
+    .level-column[data-level="3"] .level-dot { background: var(--lvl3-hue); }
+    .level-column[data-level="4"] .level-dot { background: var(--lvl4-hue); }
+    .level-column[data-level="5"] .level-dot { background: var(--lvl5-hue); }
+    .level-column[data-level="6"] .level-dot { background: var(--lvl6-hue); }
+    .column-title { font-size: 0.82rem; font-weight: 600; }
+    .column-count { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+    .level-column[data-level="0"] .column-count { background: var(--lvl0-bg); color: var(--lvl0-hue); }
+    .level-column[data-level="1"] .column-count { background: var(--lvl1-bg); color: var(--lvl1-hue); }
+    .level-column[data-level="2"] .column-count { background: var(--lvl2-bg); color: var(--lvl2-hue); }
+    .level-column[data-level="3"] .column-count { background: var(--lvl3-bg); color: var(--lvl3-hue); }
+    .level-column[data-level="4"] .column-count { background: var(--lvl4-bg); color: var(--lvl4-hue); }
+    .level-column[data-level="5"] .column-count { background: var(--lvl5-bg); color: var(--lvl5-hue); }
+    .level-column[data-level="6"] .column-count { background: var(--lvl6-bg); color: var(--lvl6-hue); }
+    .column-body { flex: 1; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .empty-state { text-align: center; padding: 2rem; font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ── WORD CARDS ── */
+    .word-card { background: var(--bg); border-radius: var(--radius-md); border: 1.5px solid var(--border); padding: 0.8rem 0.9rem; position: relative; transition: var(--transition); }
+    .word-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .word-card-word { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; padding-right: 3rem; }
+    .word-card-def { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; white-space: pre-wrap; } 
+    .word-card-example { font-size: 0.74rem; color: var(--text-muted); line-height: 1.4; margin-top: 0.35rem; font-style: italic; border-left: 2px solid var(--border); padding-left: 0.5rem; }
+    .word-card-source { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.3rem; display: flex; align-items: center; gap: 0.3rem; }
+    .word-card-source svg { flex-shrink: 0; opacity: 0.6; }
+    .word-card.inbox-card .word-card-def { font-style: italic; color: var(--text-muted); }
+    .card-actions { position: absolute; top: 0.6rem; right: 0.6rem; display: flex; gap: 0.2rem; opacity: 0; transition: var(--transition); }
+    .word-card:hover .card-actions { opacity: 1; }
+    .btn-card-action { width: 26px; height: 26px; border-radius: 50%; background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .btn-card-action:hover { background: var(--surface-alt); color: var(--text-primary); }
+    .btn-card-action.delete:hover { background: #fee2e2; color: #dc2626; }
+
+    /* ── BULK SELECT STYLING ── */
+    .bulk-mode-active .word-card { cursor: pointer; }
+    .bulk-mode-active .card-actions, .bulk-mode-active .btn-pronounce { display: none !important; }
+    .word-card.selected { border-color: var(--accent); background: var(--accent-light); }
+    .word-card.selected .word-card-word { color: var(--accent-dark); }
+    
+    .bulk-action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; transform: translateY(100%); transition: transform 0.3s; z-index: 100; box-shadow: var(--shadow-lg); }
+    .bulk-action-bar.visible { transform: translateY(0); }
+    .btn-bulk { padding: 8px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface-alt); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition); color: var(--text-primary); }
+    .btn-bulk:hover { background: var(--border); }
+    .btn-bulk.delete { color: #dc2626; border-color: #fee2e2; background: #fef2f2; }
+    .btn-bulk.delete:hover { background: #fee2e2; }
+
+    /* ── STATS PANEL ── */
+    .stats-panel { max-width: 600px; margin: 2rem auto 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .stats-panel-header { padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .stats-panel-title { font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.07em; display: flex; align-items: center; gap: 0.4rem; }
+    .stats-toggle-icon { color: var(--text-muted); transition: transform 0.3s; font-size: 0.75rem; }
+    .stats-panel.open .stats-toggle-icon { transform: rotate(180deg); }
+    .stats-panel-body { display: none; padding: 1rem 1.1rem 1.1rem; }
+    .stats-panel.open .stats-panel-body { display: block; animation: fadeIn 0.25s; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+    .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem; text-align: center; }
+    .stat-value { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+    .stat-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-top: 4px; }
+    .stat-streak { color: var(--accent); }
+    .level-bar-wrap { display: flex; flex-direction: column; gap: 0.45rem; }
+    .level-bar-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; }
+    .level-bar-label { width: 44px; font-weight: 600; color: var(--text-secondary); flex-shrink: 0; }
+    .level-bar-track { flex: 1; height: 7px; background: var(--surface-alt); border-radius: 99px; overflow: hidden; }
+    .level-bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .level-bar-fill.lvl1 { background: var(--lvl1-hue); }
+    .level-bar-fill.lvl2 { background: var(--lvl2-hue); }
+    .level-bar-fill.lvl3 { background: var(--lvl3-hue); }
+    .level-bar-fill.lvl4 { background: var(--lvl4-hue); }
+    .level-bar-fill.lvl5 { background: var(--lvl5-hue); }
+    .level-bar-count { width: 24px; text-align: right; color: var(--text-muted); font-weight: 600; }
+
+    /* ── QUIZ OVERLAY ── */
+    .quiz-overlay { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .quiz-overlay.is-open { opacity: 1; pointer-events: all; }
+    .quiz-topbar { padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .quiz-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; }
+    .quiz-progress { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); background: var(--surface-alt); padding: 4px 12px; border-radius: 99px; display: flex; align-items: center; gap: 8px;}
+    .btn-exit-quiz { display: flex; align-items: center; gap: 0.4rem; background: transparent; border: 1px solid var(--border); font-size: 0.82rem; padding: 7px 14px; border-radius: var(--radius-md); cursor: pointer; color: var(--text-secondary); }
+    .btn-exit-quiz:hover { background: var(--surface-alt); color: var(--text-primary); }
+    .quiz-body { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; gap: 1.5rem; overflow-y: auto; }
+    .quiz-filter { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 520px;}
+    .quiz-filter-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
+    .quiz-filter-btn { padding: 5px 12px; border-radius: 99px; background: var(--surface); border: 1px solid var(--border); font-size: 0.78rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: var(--transition); }
+    .quiz-filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* Flashcard */
+    .flashcard-scene { width: 100%; max-width: 520px; height: 320px; perspective: 1200px; cursor: pointer; flex-shrink: 0; }
+    .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .flashcard.is-flipped { transform: rotateY(180deg); }
+    .flashcard-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
+    .flashcard-front { background: var(--surface); border: 1px solid var(--border); }
+    /* Back face: flex column, no overflow on the face itself */
+    .flashcard-back { background: var(--surface-alt); border: 1px solid var(--border); transform: rotateY(180deg); overflow: hidden; justify-content: flex-start; padding: 0; }
+    .flashcard-back-inner { flex: 1; overflow-y: auto; padding: 1.5rem 1.5rem 0.75rem; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .flashcard-hint { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+    .flashcard-word { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; line-height: 1.2; color: var(--text-primary); word-break: break-word; }
+    .flashcard-definition { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; max-width: 380px; margin-bottom: 0.5rem; white-space: pre-wrap; text-align: left; width: 100%; }
+    .flashcard-level-badge { position: absolute; top: 1.2rem; left: 1.5rem; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; background: var(--accent-light); color: var(--accent); padding: 3px 9px; border-radius: 99px; }
+    /* SRS controls: fixed footer at bottom of card, always visible after flip */
+    .srs-controls { display: flex; gap: 0.5rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; width: 100%; justify-content: center; padding: 0.6rem 1rem 0.8rem; border-top: 1px solid var(--border); flex-shrink: 0; background: var(--surface-alt); border-radius: 0 0 var(--radius-xl) var(--radius-xl); }
+    .flashcard.is-flipped .srs-controls { opacity: 1; pointer-events: all; }
+    .btn-srs { padding: 8px 12px; font-size: 0.8rem; font-weight: 600; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: var(--transition); flex: 1; max-width: 120px; }
+    .btn-srs:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); color: var(--text-primary); }
+    .btn-srs.up:hover { border-color: var(--lvl5-hue); background: var(--lvl5-bg); color: var(--lvl5-hue); }
+    .btn-srs.down:hover { border-color: var(--lvl1-hue); background: var(--lvl1-bg); color: var(--lvl1-hue); }
+
+    /* ── HINT / MULTIPLE CHOICE ── */
+    .quiz-hint-area { width: 100%; max-width: 520px; }
+    .hint-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; }
+    .btn-show-options { width: 100%; padding: 10px; background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--radius-md); font-family: var(--font-body); font-size: 0.82rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .btn-show-options:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .btn-hide-hint { background: transparent; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.75rem; font-family: var(--font-body); font-weight: 600; padding: 4px 8px; border-radius: var(--radius-sm); transition: var(--transition); white-space: nowrap; }
+    .btn-hide-hint:hover { color: var(--accent); background: var(--accent-light); }
+    .mc-options { display: none; flex-direction: column; gap: 0.5rem; animation: fadeIn 0.25s; }
+    .mc-options.visible { display: flex; }
+    .mc-option { padding: 10px 14px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); font-family: var(--font-body); font-size: 0.85rem; color: var(--text-primary); cursor: pointer; transition: var(--transition); text-align: left; line-height: 1.4; white-space: pre-wrap; }
+    .mc-option:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-light); }
+    .mc-option.correct { border-color: var(--lvl1-hue) !important; background: var(--lvl1-bg) !important; color: var(--lvl1-hue) !important; font-weight: 600; }
+    .mc-option.wrong { border-color: var(--lvl5-hue) !important; background: var(--lvl5-bg) !important; color: var(--lvl5-hue) !important; }
+    .mc-option:disabled { cursor: default; }
+
+    /* ── UNIVERSAL SORT BAR ── */
+    .sort-bar { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .sort-btn { padding: 5px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 0.3rem; }
+    .sort-btn:hover { background: var(--surface-alt); color: var(--text-primary); }
+    .sort-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .sort-dir-btn { padding: 5px 10px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: var(--transition); }
+    .sort-dir-btn:hover { background: var(--surface-alt); color: var(--text-primary); }
+
+    /* Nav controls */
+    .quiz-controls { display: flex; align-items: center; gap: 1rem; }
+    .btn-nav { width: 48px; height: 48px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: var(--transition); }
+    .btn-nav:hover:not(:disabled) { background: var(--surface-alt); }
+    .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; }
+    .reshuffle-btn { background: var(--accent-light); color: var(--accent); border-color: var(--accent-light); margin-left: 0.5rem;}
+    .reshuffle-btn:hover { background: var(--accent); color: #fff; transform: rotate(180deg); }
+    .quiz-card-index { font-family: var(--font-display); font-size: 1rem; color: var(--text-secondary); min-width: 64px; text-align: center; }
+
+    /* ── PRONUNCIATION BUTTON ── */
+    .btn-pronounce { background: transparent; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; padding: 2px 4px; border-radius: var(--radius-sm); transition: var(--transition); vertical-align: middle; }
+    .btn-pronounce:hover { color: var(--accent); transform: scale(1.15); }
+    .flashcard-pronounce { position: absolute; top: 1.2rem; right: 1.5rem; }
+
+    /* ── TAGS ── */
+    .tag-input-wrap { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 7px 10px; cursor: text; transition: var(--transition); }
+    .tag-input-wrap:focus-within { border-color: var(--accent); }
+    .tag-chip { display: flex; align-items: center; gap: 0.25rem; background: var(--accent-light); color: var(--accent); border-radius: 99px; padding: 2px 10px 2px 8px; font-size: 0.75rem; font-weight: 600; }
+    .tag-chip-remove { background: transparent; border: none; cursor: pointer; color: inherit; font-size: 0.75rem; padding: 0; line-height: 1; opacity: 0.7; }
+    .tag-chip-remove:hover { opacity: 1; }
+    .tag-text-input { border: none; background: transparent; outline: none; font-family: var(--font-body); font-size: 0.85rem; color: var(--text-primary); min-width: 80px; flex: 1; }
+    .word-card-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+    .word-tag { font-size: 0.65rem; font-weight: 600; background: var(--accent-light); color: var(--accent); border-radius: 99px; padding: 1px 8px; }
+    .tag-filter-bar { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .tag-filter-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .tag-filter-chip { padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: var(--transition); }
+    .tag-filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ── SORT SELECT ── */
+
+    /* ── DEFINITION LINE CLAMP ── */
+    .word-card-def.clamped { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+    .word-card-def.clamp-1 { -webkit-line-clamp: 1; }
+    .word-card-def.clamp-2 { -webkit-line-clamp: 2; }
+    .word-card-def.clamp-3 { -webkit-line-clamp: 3; }
+    .word-card-def.clamp-4 { -webkit-line-clamp: 4; }
+    .word-card-def.clamp-5 { -webkit-line-clamp: 5; }
+
+    /* ── SETTINGS: DEF LINES PICKER ── */
+    .def-lines-picker { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .def-line-btn { height: 34px; min-width: 40px; padding: 0 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; font-family: var(--font-body); font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); transition: var(--transition); }
+    .def-line-btn:hover { background: var(--surface-alt); }
+    .def-line-btn.selected { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+    /* ── WORD DETAIL MODAL ── */
+    .word-detail-modal { max-width: 520px; }
+    .word-detail-title { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; line-height: 1.2; color: var(--text-primary); margin-bottom: 0.2rem; }
+    .word-detail-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+    .word-detail-section-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.35rem; }
+    .word-detail-def { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65; white-space: pre-wrap; }
+    .word-detail-example { font-size: 0.85rem; color: var(--text-muted); line-height: 1.55; font-style: italic; border-left: 3px solid var(--border); padding-left: 0.75rem; }
+    .word-detail-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .word-detail-divider { border: none; border-top: 1px solid var(--border); margin: 1.1rem 0; }
+    .word-detail-actions { display: flex; gap: 0.6rem; margin-top: 1.5rem; }
+    .word-detail-actions .btn-cancel { flex: 1; }
+    .word-detail-actions .btn-save { flex: 2; }
+
+    /* ── TOAST ── */
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-primary); color: var(--bg); font-size: 0.85rem; font-weight: 500; padding: 10px 20px; border-radius: var(--radius-md); z-index: 999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; text-align: center; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── MOBILE OPTIMIZATIONS ── */
+    @media (max-width: 720px) {
+      .app-header { padding: 0 1.25rem; }
+      .app-title { font-size: 1.4rem; }
+      .app-subtitle { display: none; }
+      .word-count-badge { display: none; }
+      .word-card .card-actions { opacity: 1; }
+      .flashcard-scene { height: 280px; }
+      .flashcard-word { font-size: 1.8rem; }
+      .btn-srs { font-size: 0.7rem; padding: 6px; }
+      .search-bar-wrap { padding: 0 1.25rem; }
+      .search-results-overlay { left: 1.25rem; right: 1.25rem; }
+      .wotd-banner { margin: 1rem 1.25rem 0; flex-wrap: wrap; }
+      .dashboard { padding: 1rem 1.25rem 6rem; }
+      .toast { bottom: 95px; }
+      
+      .quiz-topbar { padding: 1rem 1.25rem; }
+      .quiz-body { padding: 1.5rem 1rem; gap: 1rem; }
+      .quiz-controls { gap: 0.5rem; }
+      .btn-nav { width: 44px; height: 44px; }
+      .quiz-card-index { min-width: 50px; font-size: 0.9rem; }
+      
+      .bulk-action-bar { padding: 1rem 1.25rem; flex-direction: column; gap: 10px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-left">
+      <h1 class="app-title">Lexicon</h1>
+      <span class="app-subtitle">Vocabulary Tracker</span>
+    </div>
+    <div class="header-right">
+      <span class="word-count-badge" id="wordCountBadge">0 words</span>
+      <button class="btn-icon" onclick="toggleTheme()" aria-label="Toggle Theme" id="themeToggleBtn">☀️</button>
+      <button class="btn-icon" onclick="handleOpenSettings()" aria-label="Settings">⚙️</button>
+      <button class="btn-quiz" id="btnOpenQuiz" onclick="handleOpenQuiz()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Quiz Mode
+      </button>
+    </div>
+  </header>
+
+  <button class="fab-add" onclick="handleOpenModal()" aria-label="Add Word">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+
+  <div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event, 'modalBackdrop')">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Add New Word</h2>
+        <button class="btn-modal-close" onclick="handleCloseModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inputWord">Word</label>
+        <div class="input-with-button">
+          <div class="field-wrap" id="wordWrap" style="flex:1;">
+            <input class="form-input" id="inputWord" type="text" placeholder="e.g. Ephemeral" autocomplete="off" oninput="updateFieldClear('inputWord','wordWrap')"/>
+            <button class="field-clear" tabindex="-1" title="Clear" onclick="clearField('inputWord','wordWrap')">✕</button>
+          </div>
+          <button class="btn-fetch" id="btnFetch" onclick="handleFetchDefinition()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Fetch
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inputDefinition">
+          Definition & Synonyms <span class="form-label-hint">(Optional — Leave blank for Inbox)</span>
+        </label>
+        <div class="field-wrap field-wrap--textarea" id="defWrap">
+          <textarea class="form-textarea" id="inputDefinition" placeholder="e.g. Lasting for a very short time; transitory." oninput="updateFieldClear('inputDefinition','defWrap')"></textarea>
+          <button class="field-clear" tabindex="-1" title="Clear" onclick="clearField('inputDefinition','defWrap')">✕</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inputExample">
+          Example Sentence <span class="form-label-hint">(Optional)</span>
+        </label>
+        <div class="field-wrap field-wrap--textarea" id="exWrap">
+          <textarea class="form-textarea" id="inputExample" placeholder="e.g. The ephemeral beauty of cherry blossoms makes them all the more special." style="min-height:70px;" oninput="updateFieldClear('inputExample','exWrap')"></textarea>
+          <button class="field-clear" tabindex="-1" title="Clear" onclick="clearField('inputExample','exWrap')">✕</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags <span class="form-label-hint">(Optional — press Enter or comma)</span></label>
+        <div class="tag-input-wrap" id="tagInputWrap" onclick="document.getElementById('tagTextInput').focus()">
+          <datalist id="existingTagsList"></datalist>
+          <input class="tag-text-input" id="tagTextInput" type="text" list="existingTagsList" placeholder="e.g. GRE, literature…" autocomplete="off" onkeydown="handleTagKeydown(event)">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inputSource">Source <span class="form-label-hint">(Optional — where did you find this word?)</span></label>
+        <div class="field-wrap" id="sourceWrap">
+          <input class="form-input" id="inputSource" type="text" placeholder="e.g. The New York Times, Novel: 1984, Podcast…" autocomplete="off" oninput="updateFieldClear('inputSource','sourceWrap')"/>
+          <button class="field-clear" tabindex="-1" title="Clear" onclick="clearField('inputSource','sourceWrap')">✕</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Difficulty Level</label>
+        <div class="level-picker" id="levelPicker">
+          <button class="level-btn selected" data-lvl="1" onclick="handleLevelSelect(1)">1</button>
+          <button class="level-btn" data-lvl="2" onclick="handleLevelSelect(2)">2</button>
+          <button class="level-btn" data-lvl="3" onclick="handleLevelSelect(3)">3</button>
+          <button class="level-btn" data-lvl="4" onclick="handleLevelSelect(4)">4</button>
+          <button class="level-btn" data-lvl="5" onclick="handleLevelSelect(5)">5</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="handleCloseModal()">Cancel</button>
+        <button class="btn-save" onclick="handleSaveWord()">Save Word</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="settingsModal" onclick="handleBackdropClick(event, 'settingsModal')">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Settings & Data</h2>
+        <button class="btn-modal-close" onclick="document.getElementById('settingsModal').classList.remove('is-open')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="settings-option">
+        <p><strong>Definition Preview Lines</strong><br>How many lines of the definition to show on each word card. Click a card to see the full entry.</p>
+        <div class="def-lines-picker" id="defLinesPicker">
+          <button class="def-line-btn" data-lines="0" onclick="setDefLines(0)">None</button>
+          <button class="def-line-btn" data-lines="1" onclick="setDefLines(1)">1</button>
+          <button class="def-line-btn" data-lines="2" onclick="setDefLines(2)">2</button>
+          <button class="def-line-btn" data-lines="3" onclick="setDefLines(3)">3</button>
+          <button class="def-line-btn" data-lines="4" onclick="setDefLines(4)">4</button>
+          <button class="def-line-btn" data-lines="5" onclick="setDefLines(5)">5</button>
+          <button class="def-line-btn" data-lines="99" onclick="setDefLines(99)">Full</button>
+        </div>
+      </div>
+      <div class="settings-option">
+        <p><strong>Bulk Import Words</strong><br>Paste words separated by commas to easily add them directly to your Inbox.</p>
+        <textarea id="bulkImportText" class="form-textarea" placeholder="e.g. elucidate, sycophant, fastidious" style="min-height: 70px; margin-bottom: 0.5rem;"></textarea>
+        <button class="btn-primary" onclick="handleBulkImport()">➕ Bulk Add</button>
+      </div>
+      <div class="settings-option">
+        <p><strong>Export Backup</strong><br>Download your entire vocabulary list to your device as a JSON file.</p>
+        <button class="btn-primary" onclick="exportData()">⬇️ Download Backup</button>
+      </div>
+      <div class="settings-option">
+        <p><strong>Import Backup</strong><br>Restore words from a previous backup file. <em>(This will merge with current words)</em>.</p>
+        <div class="file-input-wrapper">
+          <button class="btn-primary" style="width:100%;">⬆️ Select Backup File</button>
+          <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+        </div>
+      </div>
+      <div class="settings-option">
+        <p><strong>Import Friend's Backup</strong><br>Merge a friend's vocabulary list into yours. Only new words (not already in your collection) will be added. All imported words are set to <strong>Level 1</strong> so their SRS history doesn't affect your progress.</p>
+        <div class="file-input-wrapper">
+          <button class="btn-primary" style="width:100%; background: var(--lvl2-hue);">🤝 Select Friend's File</button>
+          <input type="file" id="importFriendFile" accept=".json" onchange="importFriendData(event)">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-bar-wrap">
+    <div class="search-bar">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search your vocabulary…" autocomplete="off" oninput="handleSearch(this.value)">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+    <div class="search-results-overlay" id="searchResults"></div>
+  </div>
+
+  <div class="wotd-banner" id="wotdBanner" style="display:none;">
+    <div class="wotd-icon">✨</div>
+    <div style="flex:1;min-width:0;">
+      <div class="wotd-label">Word of the Day</div>
+      <div class="wotd-word" id="wotdWord">—</div>
+      <div class="wotd-def" id="wotdDef">—</div>
+    </div>
+    <div class="wotd-meta">
+      <span class="wotd-level-badge" id="wotdBadge" style="background:var(--accent-light);color:var(--accent);">Lvl —</span>
+      <button class="wotd-refresh" onclick="refreshWotd()" title="Show another word">↻</button>
+    </div>
+  </div>
+
+  <main class="dashboard">
+    <div class="dashboard-meta">
+      <p class="dashboard-heading">Your Vocabulary Collection</p>
+      <button id="btnBulkSelect" class="btn-quiz" onclick="toggleBulkMode()" style="padding: 6px 12px; font-size:0.75rem;">Select Words</button>
+    </div>
+
+    <div class="sort-bar" id="sortBar">
+      <span style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Sort:</span>
+      <button class="sort-btn active" data-sort="added" onclick="setSortType('added')">📅 Date Added</button>
+      <button class="sort-btn" data-sort="modified" onclick="setSortType('modified')">✏️ Modified</button>
+      <button class="sort-btn" data-sort="title" onclick="setSortType('title')">🔤 A–Z</button>
+      <button class="sort-dir-btn" id="sortDirBtn" onclick="toggleSortDir()" title="Toggle sort direction">↓</button>
+    </div>
+
+    <div class="tag-filter-bar" id="tagFilterBar" style="display:none;">
+      <span class="tag-filter-label">Tags:</span>
+      <button class="tag-filter-chip active" data-tag="all" onclick="handleTagFilter('all')">All</button>
+    </div>
+
+    <div class="level-grid single-view" id="levelGrid">
+      <div class="level-column" data-level="0"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Inbox (Needs Definition)</span></div><span class="column-count" id="count-0">0</span></div><div class="column-body" id="column-body-0"></div></div>
+      <div class="level-column active-view" data-level="1"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Level 1 Overview</span></div><span class="column-count" id="count-1">0</span></div><div class="column-body" id="column-body-1"></div></div>
+      <div class="level-column" data-level="2"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Level 2 Overview</span></div><span class="column-count" id="count-2">0</span></div><div class="column-body" id="column-body-2"></div></div>
+      <div class="level-column" data-level="3"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Level 3 Overview</span></div><span class="column-count" id="count-3">0</span></div><div class="column-body" id="column-body-3"></div></div>
+      <div class="level-column" data-level="4"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Level 4 Overview</span></div><span class="column-count" id="count-4">0</span></div><div class="column-body" id="column-body-4"></div></div>
+      <div class="level-column" data-level="5"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Level 5 Overview</span></div><span class="column-count" id="count-5">0</span></div><div class="column-body" id="column-body-5"></div></div>
+<div class="level-column" data-level="6">
+        <div class="column-header">
+          <div class="column-header-left">
+            <span class="level-dot"></span>
+            <span class="column-title" style="margin-left: 0.55rem;">All Words</span>
+          </div>
+          <span class="column-count" id="count-6">0</span>
+        </div>
+        <div class="column-body" id="column-body-6"></div>
+      </div>
+<div class="level-column" data-level="7">
+        <div class="column-header">
+          <div class="column-header-left">
+            <span class="level-dot" style="background: var(--lvl6-hue);"></span>
+            <span class="column-title" style="margin-left: 0.55rem;">Archived Words</span>
+          </div>
+          <span class="column-count" id="count-7" style="background: var(--lvl6-bg); color: var(--lvl6-hue);">0</span>
+        </div>
+        <div class="column-body" id="column-body-7"></div>
+      </div>
+
+    <div class="dashboard-tabs" id="dashboardTabs" style="margin-top: 1.5rem;">
+      <button class="dash-tab-btn" data-tab="0" onclick="switchDashboardLevel(0)">Inbox <span class="dash-tab-count" id="tab-count-0">(0)</span></button>
+      <button class="dash-tab-btn active" data-tab="1" onclick="switchDashboardLevel(1)">Lvl 1 <span class="dash-tab-count" id="tab-count-1">(0)</span></button>
+      <button class="dash-tab-btn" data-tab="2" onclick="switchDashboardLevel(2)">Lvl 2 <span class="dash-tab-count" id="tab-count-2">(0)</span></button>
+      <button class="dash-tab-btn" data-tab="3" onclick="switchDashboardLevel(3)">Lvl 3 <span class="dash-tab-count" id="tab-count-3">(0)</span></button>
+      <button class="dash-tab-btn" data-tab="4" onclick="switchDashboardLevel(4)">Lvl 4 <span class="dash-tab-count" id="tab-count-4">(0)</span></button>
+      <button class="dash-tab-btn" data-tab="5" onclick="switchDashboardLevel(5)">Lvl 5 <span class="dash-tab-count" id="tab-count-5">(0)</span></button>
+      <button class="dash-tab-btn" data-tab="6" onclick="switchDashboardLevel(6)">All Words <span class="dash-tab-count" id="tab-count-6">(0)</span></button>
+    </div>
+<div style="text-align: center; margin-top: 1.5rem;">
+      <a href="#" onclick="switchDashboardLevel(7); return false;" style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-decoration: none; border-bottom: 1px dashed var(--text-muted); padding-bottom: 2px;">
+        View Archived Words <span id="tab-count-7" style="font-size: 0.75rem;">(0)</span>
+      </a>
+    </div>
+
+    <div class="stats-panel" id="statsPanel">
+      <div class="stats-panel-header" onclick="toggleStats()">
+        <span class="stats-panel-title">📊 Progress Stats</span>
+        <span class="stats-toggle-icon">▼</span>
+      </div>
+      <div class="stats-panel-body" id="statsPanelBody"></div>
+    </div>
+  </main>
+
+  <div class="bulk-action-bar" id="bulkActionBar">
+    <span id="bulkCount" style="font-size: 0.9rem; font-weight: 600; font-family: var(--font-display);">0 selected</span>
+    <div style="display:flex; gap: 0.5rem; flex-wrap: wrap;">
+      <button class="btn-bulk" onclick="bulkAction('archive')">📦 Archive / Mastered</button>
+      <button class="btn-bulk delete" onclick="bulkAction('delete')">🗑️ Delete</button>
+      <button class="btn-bulk" onclick="toggleBulkMode()" style="background:transparent; border-color:transparent;">Cancel</button>
+    </div>
+  </div>
+
+  <div class="quiz-overlay" id="quizOverlay">
+    <div class="quiz-topbar">
+      <span class="quiz-title">📖 Quiz Mode</span>
+      <button class="btn-exit-quiz" onclick="handleCloseQuiz()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Exit
+      </button>
+    </div>
+    <div class="quiz-body">
+      <div class="quiz-filter">
+        <span class="quiz-filter-label">Filter:</span>
+        <button class="quiz-filter-btn active" data-filter="all" onclick="handleQuizFilter('all')">All</button>
+        <button class="quiz-filter-btn" data-filter="1" onclick="handleQuizFilter('1')">Lvl 1</button>
+        <button class="quiz-filter-btn" data-filter="2" onclick="handleQuizFilter('2')">Lvl 2</button>
+        <button class="quiz-filter-btn" data-filter="3" onclick="handleQuizFilter('3')">Lvl 3</button>
+        <button class="quiz-filter-btn" data-filter="4" onclick="handleQuizFilter('4')">Lvl 4</button>
+        <button class="quiz-filter-btn" data-filter="5" onclick="handleQuizFilter('5')">Lvl 5</button>
+      </div>
+
+      <div class="quiz-progress" id="quizProgress">Card 1 of 0</div>
+
+      <div class="flashcard-scene" onclick="handleFlipCard()">
+        <div class="flashcard" id="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <span class="flashcard-level-badge" id="flashcardLevelBadge">Level —</span>
+            <button class="btn-pronounce flashcard-pronounce" id="flashcardPronounceBtn" onclick="pronounceWord(event)" title="Pronounce">🔊</button>
+            <p class="flashcard-hint">Tap to reveal definition</p>
+            <h2 class="flashcard-word" id="flashcardWord">—</h2>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-back-inner">
+              <span class="flashcard-level-badge" id="flashcardLevelBadgeBack" style="position:relative;top:auto;left:auto;margin-bottom:0.6rem;align-self:flex-start;">Level —</span>
+              <p class="flashcard-hint" style="margin-bottom:0.4rem;">Definition</p>
+              <h2 class="flashcard-word" id="flashcardWordBack" style="font-size:1.3rem;margin-bottom:0.5rem;">—</h2>
+              <p class="flashcard-definition" id="flashcardDefinition">—</p>
+            </div>
+            <div class="srs-controls">
+              <button class="btn-srs down" onclick="handleSrsAction(event, -1)">⬇️ Lvl Down</button>
+              <button class="btn-srs" onclick="handleSrsAction(event, 0)">➖ Same</button>
+              <button class="btn-srs up" onclick="handleSrsAction(event, 1)">⬆️ Lvl Up</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-hint-area" id="quizHintArea">
+        <div class="hint-header" id="hintHeader">
+          <button class="btn-show-options" id="btnShowOptions" onclick="showMultipleChoice()" style="flex:1;">
+            💡 Need a hint? Show options
+          </button>
+          <button class="btn-hide-hint" onclick="toggleHintArea()" title="Hide hint area" id="btnHideHint">✕ Hide</button>
+        </div>
+        <div class="mc-options" id="mcOptions"></div>
+      </div>
+      <button class="btn-show-options" id="btnRevealHint" onclick="toggleHintArea()" style="display:none; max-width:520px; width:100%; opacity:0.6;">
+        💡 Show hint
+      </button>
+
+      <div class="quiz-controls">
+        <button class="btn-nav" id="btnPrev" onclick="handlePrevCard()" disabled>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="quiz-card-index" id="quizCardIndex">— / —</span>
+        <button class="btn-nav" id="btnNext" onclick="handleNextCard()" disabled>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="btn-nav reshuffle-btn" onclick="handleReshuffle()" title="Reshuffle Deck">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- ── WORD DETAIL MODAL ── -->
+  <div class="modal-backdrop" id="wordDetailBackdrop" onclick="handleBackdropClick(event, 'wordDetailBackdrop')">
+    <div class="modal word-detail-modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="detailModalHeading">Word</h2>
+        <button class="btn-modal-close" onclick="closeWordDetail()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="wordDetailBody"></div>
+      <div class="word-detail-actions">
+        <button class="btn-cancel" onclick="closeWordDetail()">Close</button>
+        <button class="btn-cancel" id="detailResetLevelBtn" onclick="resetWordToLevel1()" title="Push back to Level 1 for re-study" style="flex:1.2;">↩️ Reset to Lvl 1</button>
+        <button class="btn-save" id="detailEditBtn" onclick="">✏️ Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY    = 'lexicon_vocab_data';
+    const THEME_KEY      = 'lexicon_theme';
+    const STREAK_KEY     = 'lexicon_streak';
+    const WOTD_KEY       = 'lexicon_wotd';
+    const DEF_LINES_KEY  = 'lexicon_def_lines';
+
+    let defLinesLimit = parseInt(localStorage.getItem(DEF_LINES_KEY) ?? '4'); // 0=none, 1-5=lines, 99=full
+
+    let selectedLevel        = 1;
+    let activeDashboardLevel = 1;
+    let editingId            = null;
+    let currentQuizIndex     = 0;
+    let quizDeck             = [];
+    let selectedQuizLevels   = new Set(['1','2','3','4','5']);
+    let pendingTags          = [];   
+    let activeTagFilter      = 'all';
+
+    let isBulkMode           = false;
+    let selectedWords        = new Set();
+
+    let sortType             = 'added';   // 'added' | 'modified' | 'title'
+    let sortAsc              = false;      // false = newest/Z first by default
+    let hintAreaVisible      = true;
+
+    /* ────────────────────────────────────────
+       1. THEME (CYCLE)
+    ──────────────────────────────────────── */
+    const themes = ['light', 'dark', 'amoled'];
+    const themeIcons = ['☀️', '🌙', '🌌'];
+    let currentThemeIndex = 0;
+
+    function initTheme() {
+      const saved = localStorage.getItem(THEME_KEY) || 'light';
+      currentThemeIndex = themes.indexOf(saved);
+      if (currentThemeIndex === -1) currentThemeIndex = 0;
+      document.documentElement.setAttribute('data-theme', themes[currentThemeIndex]);
+      document.getElementById('themeToggleBtn').textContent = themeIcons[currentThemeIndex];
+    }
+    
+    function toggleTheme() {
+      currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+      const newTheme = themes[currentThemeIndex];
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem(THEME_KEY, newTheme);
+      document.getElementById('themeToggleBtn').textContent = themeIcons[currentThemeIndex];
+    }
+
+    /* ────────────────────────────────────────
+       2. DATA & EXPORT/IMPORT
+    ──────────────────────────────────────── */
+    function getAllWords() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    }
+    function saveWordStore(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+
+    function exportData() {
+      const words = getAllWords();
+      if (!words.length) return showToast('No words to export.');
+      const blob = new Blob([JSON.stringify(words, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = `lexicon_backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click(); URL.revokeObjectURL(url);
+      showToast('Backup downloaded!');
+    }
+    
+    function importData(event) {
+      const file = event.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!Array.isArray(imported)) throw new Error();
+          const current = getAllWords();
+          imported.forEach(w => { if (!current.some(c => c.id === w.id)) current.push(w); });
+          saveWordStore(current); renderDashboard(); showToast('Imported successfully!');
+          document.getElementById('settingsModal').classList.remove('is-open');
+        } catch { showToast('Error importing file.'); }
+      };
+      reader.readAsText(file); event.target.value = '';
+    }
+
+    function handleBulkImport() {
+      const txt = document.getElementById('bulkImportText').value;
+      if (!txt.trim()) return showToast('Enter some words first.');
+      const chunks = txt.split(',').map(s => s.trim()).filter(s => s);
+      if (!chunks.length) return;
+      const words = getAllWords();
+      let added = 0;
+      const now = Date.now();
+      
+      chunks.forEach((wStr, i) => {
+        if (!words.some(w => w.word.toLowerCase() === wStr.toLowerCase())) {
+          words.push({
+            id: (now + i).toString(),
+            word: wStr,
+            definition: '',
+            level: 0,
+            example: '',
+            tags: [],
+            dateAdded: now + i,
+            dateModified: now + i
+          });
+          added++;
+        }
+      });
+      saveWordStore(words);
+      renderDashboard();
+      document.getElementById('bulkImportText').value = '';
+      showToast(`Added ${added} new words to Inbox!`);
+    }
+
+    /* ────────────────────────────────────────
+       3. STREAK TRACKING
+    ──────────────────────────────────────── */
+    function getStreakData() {
+      const d = localStorage.getItem(STREAK_KEY);
+      return d ? JSON.parse(d) : { streak: 0, lastDate: null, promoted: 0, demoted: 0, added: 0, addedWeek: [], promotedWeek: [] };
+    }
+    function recordActivity(type) {
+      const data   = getStreakData();
+      const today  = new Date().toDateString();
+      const sevenAgo = Date.now() - 7 * 86400000;
+
+      if (type === 'add') {
+        data.added = (data.added || 0) + 1;
+        data.addedWeek = (data.addedWeek || []).filter(t => t > sevenAgo);
+        data.addedWeek.push(Date.now());
+      }
+      if (type === 'promote') {
+        data.promoted = (data.promoted || 0) + 1;
+        data.promotedWeek = (data.promotedWeek || []).filter(t => t > sevenAgo);
+        data.promotedWeek.push(Date.now());
+      }
+      if (type === 'demote') { data.demoted = (data.demoted || 0) + 1; }
+
+      if (data.lastDate !== today) {
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        if (data.lastDate === yesterday.toDateString()) data.streak = (data.streak || 0) + 1;
+        else data.streak = 1;
+        data.lastDate = today;
+      }
+      localStorage.setItem(STREAK_KEY, JSON.stringify(data));
+    }
+
+    /* ────────────────────────────────────────
+       4. API FETCH 
+    ──────────────────────────────────────── */
+    async function handleFetchDefinition() {
+      const wordInput = document.getElementById('inputWord').value.trim();
+      if (!wordInput) return showToast('Please enter a word first.');
+      const btn = document.getElementById('btnFetch');
+      const orig = btn.innerHTML; btn.innerHTML = '⏳ Fetching…'; btn.disabled = true;
+      try {
+        const res  = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(wordInput)}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        
+        let fullDefText = "";
+        let fullSynonyms = new Set();
+        let firstExample = "";
+
+        data[0].meanings.forEach(m => {
+          fullDefText += `[${m.partOfSpeech}]\n`;
+          m.definitions.slice(0, 2).forEach((d, i) => { 
+            fullDefText += `• ${d.definition}\n`;
+            if (d.example && !firstExample) firstExample = d.example; 
+          });
+          fullDefText += "\n";
+          (m.synonyms || []).forEach(syn => fullSynonyms.add(syn));
+        });
+
+        if (fullSynonyms.size > 0) {
+           fullDefText += `Synonyms: ${Array.from(fullSynonyms).slice(0, 8).join(', ')}`;
+        }
+
+        if (fullDefText.trim()) {
+          document.getElementById('inputDefinition').value = fullDefText.trim();
+          if (firstExample && !document.getElementById('inputExample').value) {
+            document.getElementById('inputExample').value = firstExample;
+          }
+          showToast('Definitions & Synonyms retrieved!');
+          syncAllFieldClears();
+        } else {
+          showToast('No detailed definition found.');
+        }
+      } catch { showToast("Dictionary couldn't find that word."); }
+      finally { btn.innerHTML = orig; btn.disabled = false; }
+    }
+
+    /* ────────────────────────────────────────
+       5. TAGS & AUTOCOMPLETE
+    ──────────────────────────────────────── */
+    function handleTagKeydown(e) {
+      const input = document.getElementById('tagTextInput');
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const val = input.value.replace(/,/g, '').trim();
+        if (val && !pendingTags.includes(val)) { pendingTags.push(val); renderPendingTags(); }
+        input.value = '';
+      }
+      if (e.key === 'Backspace' && !input.value && pendingTags.length) {
+        pendingTags.pop(); renderPendingTags();
+      }
+    }
+    
+    function renderPendingTags() {
+      const wrap  = document.getElementById('tagInputWrap');
+      const input = document.getElementById('tagTextInput');
+      wrap.querySelectorAll('.tag-chip').forEach(c => c.remove());
+      pendingTags.forEach((tag, i) => {
+        const chip = document.createElement('div');
+        chip.className = 'tag-chip';
+        chip.innerHTML = `${escapeHtml(tag)}<button class="tag-chip-remove" onclick="removeTag(${i})">✕</button>`;
+        wrap.insertBefore(chip, input);
+      });
+    }
+    function removeTag(i) { pendingTags.splice(i, 1); renderPendingTags(); }
+
+    function getAllTags(words) {
+      const set = new Set();
+      words.forEach(w => (w.tags || []).forEach(t => set.add(t)));
+      return [...set].sort();
+    }
+    function handleTagFilter(tag) {
+      activeTagFilter = tag;
+      document.querySelectorAll('.tag-filter-chip').forEach(c => c.classList.toggle('active', c.dataset.tag === tag));
+      renderDashboard();
+    }
+
+    /* ────────────────────────────────────────
+       6. CRUD & BULK ACTIONS
+    ──────────────────────────────────────── */
+    function handleSaveWord() {
+      const wordText = document.getElementById('inputWord').value.trim();
+      const defText  = document.getElementById('inputDefinition').value.trim();
+      const exText   = document.getElementById('inputExample').value.trim();
+      const tagInput = document.getElementById('tagTextInput').value.replace(/,/g,'').trim();
+      if (tagInput && !pendingTags.includes(tagInput)) pendingTags.push(tagInput);
+
+      if (!wordText) return showToast('Please enter a word.');
+      const words      = getAllWords();
+      const finalLevel = defText ? parseInt(selectedLevel) : 0;
+      const now        = Date.now();
+
+      if (editingId) {
+        const idx = words.findIndex(w => w.id === editingId);
+        if (idx !== -1) { 
+          words[idx].word = wordText; 
+          words[idx].definition = defText; 
+          words[idx].level = finalLevel; 
+          words[idx].example = exText; 
+          words[idx].tags = [...pendingTags];
+          words[idx].source = document.getElementById('inputSource').value.trim();
+          words[idx].dateModified = now;
+        }
+        showToast(finalLevel === 0 ? 'Saved to Inbox' : `Updated "${wordText}"`);
+      } else {
+        words.push({ 
+          id: now.toString(), 
+          word: wordText, 
+          definition: defText, 
+          level: finalLevel, 
+          example: exText, 
+          tags: [...pendingTags],
+          source: document.getElementById('inputSource').value.trim(),
+          dateAdded: now,
+          dateModified: now
+        });
+        recordActivity('add');
+        showToast(finalLevel === 0 ? 'Saved to Inbox' : `Saved "${wordText}"`);
+      }
+      saveWordStore(words); renderDashboard(); switchDashboardLevel(finalLevel); handleCloseModal();
+    }
+
+    function deleteWord(wordId, event) {
+      if(event) event.stopPropagation();
+      if (!confirm('Delete this word?')) return;
+      saveWordStore(getAllWords().filter(w => w.id !== wordId));
+      renderDashboard(); showToast('Word deleted.');
+    }
+
+    function openEditModal(wordId, event) {
+      if(event) event.stopPropagation();
+      const word = getAllWords().find(w => w.id === wordId); if (!word) return;
+      editingId = word.id;
+      document.getElementById('modalTitle').textContent = 'Edit Word';
+      document.getElementById('inputWord').value       = word.word;
+      document.getElementById('inputDefinition').value = word.definition || '';
+      document.getElementById('inputExample').value    = word.example || '';
+      document.getElementById('inputSource').value     = word.source || '';
+      pendingTags = [...(word.tags || [])]; renderPendingTags();
+      handleLevelSelect(word.level === 0 ? 1 : word.level);
+      
+      // Setup Datalist autocomplete
+      const tagDatalist = document.getElementById('existingTagsList');
+      tagDatalist.innerHTML = getAllTags(getAllWords()).map(t => `<option value="${escapeHtml(t)}">`).join('');
+
+      document.getElementById('modalBackdrop').classList.add('is-open');
+      syncAllFieldClears();
+    }
+
+    /* Bulk Logic */
+    function toggleBulkMode() {
+      isBulkMode = !isBulkMode;
+      selectedWords.clear();
+      document.getElementById('bulkActionBar').classList.toggle('visible', isBulkMode);
+      document.getElementById('btnBulkSelect').textContent = isBulkMode ? 'Cancel Select' : 'Select Words';
+      document.getElementById('levelGrid').classList.toggle('bulk-mode-active', isBulkMode);
+      renderDashboard();
+    }
+
+    function handleCardClick(id, event) {
+      if (!isBulkMode) return; 
+      event.preventDefault();
+      if (selectedWords.has(id)) selectedWords.delete(id);
+      else selectedWords.add(id);
+      renderDashboard();
+      document.getElementById('bulkCount').textContent = `${selectedWords.size} selected`;
+    }
+
+    function bulkAction(action) {
+      if (selectedWords.size === 0) return;
+      const actionText = action === 'delete' ? 'delete completely' : 'move to Mastered/Archived';
+      if (!confirm(`Are you sure you want to ${actionText} the ${selectedWords.size} selected word(s)?`)) return;
+      
+      let words = getAllWords();
+      const now = Date.now();
+      
+      if (action === 'delete') {
+         words = words.filter(w => !selectedWords.has(w.id));
+      } else if (action === 'archive') {
+         words.forEach(w => {
+            if (selectedWords.has(w.id)) { w.level = 7; w.dateModified = now; }
+         });
+      }
+      
+      saveWordStore(words);
+      toggleBulkMode();
+      showToast(`Action completed for ${selectedWords.size} words.`);
+    }
+
+    /* ────────────────────────────────────────
+       7. SEARCH
+    ──────────────────────────────────────── */
+    function handleSearch(query) {
+      const q       = query.trim().toLowerCase();
+      const clear   = document.getElementById('searchClear');
+      const overlay = document.getElementById('searchResults');
+      clear.classList.toggle('visible', q.length > 0);
+      if (!q) { overlay.classList.remove('visible'); return; }
+
+      const words   = getAllWords();
+      const matches = words.filter(w =>
+        w.word.toLowerCase().includes(q) ||
+        (w.definition || '').toLowerCase().includes(q) ||
+        (w.tags || []).some(t => t.toLowerCase().includes(q))
+      );
+
+      if (!matches.length) {
+        overlay.innerHTML = `<div class="search-no-results">No words match "<strong>${escapeHtml(q)}</strong>"</div>`;
+      } else {
+        const lvlColors = ['lvl0','lvl1','lvl2','lvl3','lvl4','lvl5','lvl6'];
+        overlay.innerHTML = matches.slice(0,10).map(w => {
+          const lvl  = w.level || 0;
+          const hue  = `var(--${lvlColors[lvl]}-hue)`;
+          const bg   = `var(--${lvlColors[lvl]}-bg)`;
+          return `<div class="search-result-item" onclick="jumpToWord('${w.id}')">
+            <div style="flex:1;min-width:0;">
+              <div class="search-result-word">${escapeHtml(w.word)}</div>
+              ${w.definition ? `<div class="search-result-def">${escapeHtml(w.definition.slice(0,80))}${w.definition.length>80?'…':''}</div>` : ''}
+            </div>
+            <span class="search-result-level" style="background:${bg};color:${hue};">${lvl === 0 ? 'Inbox' : (lvl === 6 ? 'Archived' : 'Lvl ' + lvl)}</span>
+          </div>`;
+        }).join('');
+      }
+      overlay.classList.add('visible');
+    }
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchClear').classList.remove('visible');
+      document.getElementById('searchResults').classList.remove('visible');
+    }
+    function jumpToWord(id) {
+      const word = getAllWords().find(w => w.id === id); if (!word) return;
+      clearSearch();
+      switchDashboardLevel(word.level);
+      setTimeout(() => {
+        const el = document.querySelector(`[data-word-id="${id}"]`);
+        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.outline = `2px solid var(--accent)`; setTimeout(() => el.style.outline = '', 1500); }
+      }, 100);
+    }
+
+    /* ────────────────────────────────────────
+       8. WORD OF THE DAY
+    ──────────────────────────────────────── */
+    function getWotd(words) {
+      if (!words.length) return null;
+      const today    = new Date().toDateString();
+      const cached   = localStorage.getItem(WOTD_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.date === today) {
+          const found = words.find(w => w.id === parsed.id);
+          if (found) return found;
+        }
+      }
+      return pickNewWotd(words, today);
+    }
+    function pickNewWotd(words, today) {
+      const eligible = words.filter(w => w.level > 0 && w.level <= 5 && w.definition);
+      if (!eligible.length) return null;
+      const pick = eligible[Math.floor(Math.random() * eligible.length)];
+      localStorage.setItem(WOTD_KEY, JSON.stringify({ id: pick.id, date: today || new Date().toDateString() }));
+      return pick;
+    }
+    function refreshWotd() {
+      localStorage.removeItem(WOTD_KEY);
+      const words = getAllWords();
+      const pick  = pickNewWotd(words, new Date().toDateString());
+      renderWotd(pick);
+    }
+    function renderWotd(word) {
+      const banner = document.getElementById('wotdBanner');
+      if (!word) { banner.style.display = 'none'; return; }
+      banner.style.display = 'flex';
+      document.getElementById('wotdWord').textContent = word.word;
+      document.getElementById('wotdDef').textContent  = word.definition ? word.definition.slice(0, 100) + (word.definition.length > 100 ? '…' : '') : '';
+      const lvlColors = ['lvl0','lvl1','lvl2','lvl3','lvl4','lvl5','lvl6'];
+      const lvl = word.level || 0;
+      const badge = document.getElementById('wotdBadge');
+      badge.style.background = `var(--${lvlColors[lvl]}-bg)`;
+      badge.style.color       = `var(--${lvlColors[lvl]}-hue)`;
+      badge.textContent       = lvl === 0 ? 'Inbox' : `Lvl ${lvl}`;
+    }
+
+    /* ────────────────────────────────────────
+       9. STATS PANEL
+    ──────────────────────────────────────── */
+    function toggleStats() {
+      document.getElementById('statsPanel').classList.toggle('open');
+    }
+    function renderStats() {
+      const words  = getAllWords();
+      const streak = getStreakData();
+      const body   = document.getElementById('statsPanelBody');
+      const total  = words.length;
+      const mastered = words.filter(w => w.level >= 5).length;
+      const sevenAgo = Date.now() - 7 * 86400000;
+      const addedW   = (streak.addedWeek || []).filter(t => t > sevenAgo).length;
+      const promoW   = (streak.promotedWeek || []).filter(t => t > sevenAgo).length;
+      const buckets  = [0,0,0,0,0,0,0];
+      words.forEach(w => { if (buckets[w.level] !== undefined) buckets[w.level]++; });
+      const maxBucket = Math.max(...buckets.slice(1, 6), 1);
+
+      body.innerHTML = `
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">Total Words</div></div>
+          <div class="stat-card"><div class="stat-value stat-streak">${streak.streak || 0}🔥</div><div class="stat-label">Day Streak</div></div>
+          <div class="stat-card"><div class="stat-value">${mastered}</div><div class="stat-label">Mastered (Lvl 5+)</div></div>
+        </div>
+        <div class="stats-grid" style="margin-bottom:1rem;">
+          <div class="stat-card"><div class="stat-value" style="font-size:1.2rem;">${addedW}</div><div class="stat-label">Added (7d)</div></div>
+          <div class="stat-card"><div class="stat-value" style="font-size:1.2rem;">${promoW}</div><div class="stat-label">Promoted (7d)</div></div>
+          <div class="stat-card"><div class="stat-value" style="font-size:1.2rem;">${streak.demoted || 0}</div><div class="stat-label">Demoted</div></div>
+        </div>
+        <div class="level-bar-wrap">
+          ${[1,2,3,4,5].map(i => `
+            <div class="level-bar-row">
+              <span class="level-bar-label">Level ${i}</span>
+              <div class="level-bar-track"><div class="level-bar-fill lvl${i}" style="width:${Math.round(buckets[i]/maxBucket*100)}%"></div></div>
+              <span class="level-bar-count">${buckets[i]}</span>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    /* ────────────────────────────────────────
+       10. DASHBOARD RENDER & SWIPE
+    ──────────────────────────────────────── */
+    function renderDashboard() {
+      const allWords = getAllWords();
+
+      const badge = document.getElementById('wordCountBadge');
+      badge.style.display = allWords.length > 0 ? 'inline-block' : 'none';
+      badge.textContent   = `${allWords.length} word${allWords.length !== 1 ? 's' : ''}`;
+
+      renderWotd(getWotd(allWords));
+      renderStats();
+
+      const allTags = getAllTags(allWords);
+      const tagBar  = document.getElementById('tagFilterBar');
+      if (allTags.length) {
+        tagBar.style.display = 'flex';
+        const existing = new Set([...tagBar.querySelectorAll('.tag-filter-chip:not([data-tag="all"])')].map(c => c.dataset.tag));
+        allTags.forEach(tag => {
+          if (!existing.has(tag)) {
+            const chip = document.createElement('button');
+            chip.className = 'tag-filter-chip'; chip.dataset.tag = tag;
+            chip.textContent = tag;
+            chip.onclick = () => handleTagFilter(tag);
+            tagBar.appendChild(chip);
+          }
+        });
+        tagBar.querySelectorAll('.tag-filter-chip').forEach(c => c.classList.toggle('active', c.dataset.tag === activeTagFilter));
+      } else { tagBar.style.display = 'none'; }
+
+      const words = activeTagFilter === 'all' ? allWords : allWords.filter(w => (w.tags||[]).includes(activeTagFilter));
+      const buckets = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[] };
+      words.forEach(item => { 
+        if (item.level >= 0 && item.level <= 5) {
+          buckets[item.level].push(item); 
+        } else if (item.level === 7) {
+          buckets[7].push(item); 
+        }
+        
+        // Push to All Words, but keep Archived (Level 7) hidden
+        if (item.level !== 7) {
+          buckets[6].push(item); 
+        }
+      });
+
+      for (let i = 0; i <= 7; i++) {
+             let list = buckets[i];
+        // Universal sort applied to all buckets
+        list.sort((a, b) => {
+          let cmp;
+          if (sortType === 'title') cmp = a.word.localeCompare(b.word);
+          else if (sortType === 'modified') cmp = (b.dateModified || parseInt(b.id)) - (a.dateModified || parseInt(a.id));
+          else cmp = (b.dateAdded || parseInt(b.id)) - (a.dateAdded || parseInt(a.id));
+          return sortAsc ? -cmp : cmp;
+        });
+
+        const tabCountEl = document.getElementById(`tab-count-${i}`);
+                  if (tabCountEl) tabCountEl.textContent = `(${list.length})`;
+        
+        const body = document.getElementById(`column-body-${i}`);
+        body.innerHTML = '';
+        if (!list.length) {
+          body.innerHTML = `<div class="empty-state"><p>${i === 0 ? 'Inbox is empty. Great job!' : 'No words yet.'}</p></div>`;
+        } else {
+          list.forEach(item => {
+            const card = document.createElement('div');
+            card.className = `word-card${i === 0 ? ' inbox-card' : ''}${isBulkMode && selectedWords.has(item.id) ? ' selected' : ''}`;
+            card.dataset.wordId = item.id;
+            
+            if (isBulkMode) {
+               card.onclick = (e) => handleCardClick(item.id, e);
+            } else {
+               card.onclick = (e) => openWordDetail(item.id, e);
+               card.style.cursor = 'pointer';
+            }
+
+const tagsHtml = (item.tags||[]).length ? `<div class="word-card-tags">${item.tags.map(t=>`<span class="word-tag">${escapeHtml(t)}</span>`).join('')}</div>` : '';
+            const sourceHtml = item.source ? `<div class="word-card-source"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>${escapeHtml(item.source)}</div>` : '';
+            const exHtml   = item.example ? `<div class="word-card-example">${escapeHtml(item.example)}</div>` : '';
+            
+            // Definition clamping
+            const defClampClass = defLinesLimit === 0 ? 'word-card-def' : (defLinesLimit === 99 ? 'word-card-def' : `word-card-def clamped clamp-${defLinesLimit}`);
+            const defDisplay    = defLinesLimit === 0 ? '' : (item.definition ? escapeHtml(item.definition) : 'Awaiting definition…');
+            const defHtml       = defLinesLimit === 0 ? '' : `<div class="${defClampClass}">${defDisplay}</div>`;
+            
+            // Dynamically generate the correct color and text for the level badge
+            const lvlColors = ['lvl0','lvl1','lvl2','lvl3','lvl4','lvl5','lvl6','lvl7'];
+            const lvlNum = item.level || 0;
+            const lvlName = lvlNum === 0 ? 'Inbox' : (lvlNum === 7 ? 'Archive' : `Lvl ${lvlNum}`);
+            const badgeHtml = `<span style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: var(--${lvlColors[lvlNum]}-bg); color: var(--${lvlColors[lvlNum]}-hue); margin-left: 0.4rem; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em;">${lvlName}</span>`;
+
+            card.innerHTML = `
+              <div class="word-card-word">
+                ${escapeHtml(item.word)}
+                ${badgeHtml}
+                <button class="btn-pronounce" onclick="pronounceCard(event, '${escapeHtml(item.word)}')" title="Pronounce">🔊</button>
+              </div>
+              ${defHtml}
+              ${exHtml}${tagsHtml}${sourceHtml}
+              <div class="card-actions">
+                <button class="btn-card-action" onclick="openEditModal('${item.id}', event)" title="Edit">✏️</button>
+                <button class="btn-card-action delete" onclick="deleteWord('${item.id}', event)" title="Delete">🗑️</button>
+              </div>`;
+            body.appendChild(card);
+          });
+        }
+      }
+    }
+
+    function switchDashboardLevel(lvl) {
+      activeDashboardLevel = parseInt(lvl);
+      document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.tab) === activeDashboardLevel));
+      document.querySelectorAll('.level-column').forEach(c => c.classList.toggle('active-view', parseInt(c.dataset.level) === activeDashboardLevel));
+    }
+
+    /* Swipe Logic */
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const grid = document.getElementById('levelGrid');
+    
+    grid.addEventListener('touchstart', e => { 
+      touchStartX = e.changedTouches[0].screenX; 
+    }, {passive: true});
+    
+    grid.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, {passive: true});
+    
+    function handleSwipe() {
+      const threshold = 60;
+      if (touchEndX < touchStartX - threshold) {
+        if (activeDashboardLevel < 6) switchDashboardLevel(activeDashboardLevel + 1);
+      } else if (touchEndX > touchStartX + threshold) {
+        if (activeDashboardLevel > 0) switchDashboardLevel(activeDashboardLevel - 1);
+      }
+    }
+
+    /* ────────────────────────────────────────
+       11. QUIZ & SRS
+    ──────────────────────────────────────── */
+    function startQuiz() {
+      const words    = getAllWords();
+      // Level 7 acts purely as an archive and skips the main quiz
+      const filtered = words.filter(w => selectedQuizLevels.has(w.level.toString()) && w.level !== 0 && w.level !== 7);
+      quizDeck = [];
+      filtered.forEach(w => { for (let i = 0; i < (6 - w.level); i++) quizDeck.push(w); });
+      shuffleDeck();
+      currentQuizIndex = 0;
+      document.getElementById('flashcard').classList.remove('is-flipped');
+      resetHintArea();
+      updateQuizUI();
+    }
+
+    function shuffleDeck() {
+      for (let i = quizDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [quizDeck[i], quizDeck[j]] = [quizDeck[j], quizDeck[i]];
+      }
+    }
+
+    function handleReshuffle() {
+      if (quizDeck.length === 0) return;
+      shuffleDeck();
+      currentQuizIndex = 0;
+      document.getElementById('flashcard').classList.remove('is-flipped');
+      updateQuizUI();
+      showToast("Deck reshuffled!");
+    }
+
+    function handleQuizFilter(val) {
+      if (val === 'all') { if (selectedQuizLevels.size === 5) selectedQuizLevels.clear(); else selectedQuizLevels = new Set(['1','2','3','4','5']); }
+      else { if (selectedQuizLevels.has(val)) selectedQuizLevels.delete(val); else selectedQuizLevels.add(val); }
+      document.querySelectorAll('.quiz-filter-btn').forEach(b => {
+        const v = b.dataset.filter;
+        b.classList.toggle('active', v === 'all' ? selectedQuizLevels.size === 5 : selectedQuizLevels.has(v));
+      });
+      startQuiz();
+    }
+
+    function handleSrsAction(event, change) {
+      event.stopPropagation();
+      const card = quizDeck[currentQuizIndex]; if (!card) return;
+      if (change !== 0) {
+        const words = getAllWords();
+        const idx   = words.findIndex(w => w.id === card.id);
+        if (idx !== -1) {
+          // Allow words to naturally graduate into Mastered (6) via SRS
+          let lvl = Math.min(7, Math.max(1, words[idx].level + change));
+        words[idx].level = lvl; 
+        words[idx].dateModified = Date.now();
+        card.level = lvl;
+        saveWordStore(words); renderDashboard();
+        if (change > 0) recordActivity('promote'); else recordActivity('demote');
+        
+        if(lvl === 7) showToast(`Word mastered! Moved to Archive.`);
+        else showToast(`Moved to Level ${lvl}.`);
+        }
+      }
+      setTimeout(() => handleNextCard(), 150);
+    }
+
+    function updateQuizUI() {
+      const total = quizDeck.length;
+      const card  = quizDeck[currentQuizIndex];
+      document.getElementById('quizProgress').textContent   = total > 0 ? `Card ${currentQuizIndex + 1} of ${total}` : '0 Cards';
+      document.getElementById('quizCardIndex').textContent  = total > 0 ? `${currentQuizIndex + 1} / ${total}` : '— / —';
+      if (card) {
+        document.getElementById('flashcardWord').textContent        = card.word;
+        document.getElementById('flashcardWordBack').textContent    = card.word;
+        document.getElementById('flashcardDefinition').textContent  = card.definition;
+        document.getElementById('flashcardLevelBadge').textContent  = `Level ${card.level}`;
+        document.getElementById('flashcardLevelBadgeBack').textContent = `Level ${card.level}`;
+      } else {
+        document.getElementById('flashcardWord').textContent = 'Empty';
+        document.getElementById('flashcardDefinition').textContent = 'Select filter levels that contain defined words.';
+      }
+      document.getElementById('btnPrev').disabled = (currentQuizIndex === 0 || total === 0);
+      document.getElementById('btnNext').disabled = (currentQuizIndex >= total - 1 || total === 0);
+      resetHintArea();
+    }
+
+    /* ── Multiple-Choice Hint ── */
+    function resetHintArea() {
+      document.getElementById('btnShowOptions').style.display = 'flex';
+      const mc = document.getElementById('mcOptions');
+      mc.classList.remove('visible'); mc.innerHTML = '';
+      // Restore hint area visibility per user preference
+      document.getElementById('quizHintArea').style.display = hintAreaVisible ? 'block' : 'none';
+      document.getElementById('btnRevealHint').style.display = hintAreaVisible ? 'none' : 'flex';
+    }
+
+    function showMultipleChoice() {
+      const card = quizDeck[currentQuizIndex]; if (!card) return;
+      document.getElementById('btnShowOptions').style.display = 'none';
+
+      const allWords    = getAllWords().filter(w => w.id !== card.id && w.definition);
+      const shuffled    = allWords.sort(() => Math.random() - 0.5).slice(0, 3);
+      const options     = [{ def: card.definition, correct: true }, ...shuffled.map(w => ({ def: w.definition, correct: false }))];
+      
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+
+      const mc = document.getElementById('mcOptions');
+      mc.innerHTML = options.map((o, i) => `
+        <button class="mc-option" onclick="handleMcAnswer(this, ${o.correct})">${escapeHtml(o.def)}</button>
+      `).join('');
+      mc.classList.add('visible');
+    }
+
+    function handleMcAnswer(btn, correct) {
+      document.querySelectorAll('.mc-option').forEach(b => b.disabled = true);
+      btn.classList.add(correct ? 'correct' : 'wrong');
+      if (!correct) {
+        document.querySelectorAll('.mc-option').forEach(b => {
+          if (!b.classList.contains('wrong') && b.textContent === quizDeck[currentQuizIndex]?.definition) b.classList.add('correct');
+        });
+      }
+      setTimeout(() => { document.getElementById('flashcard').classList.add('is-flipped'); }, 400);
+    }
+
+    /* ── Nav ── */
+    function handleOpenQuiz() {
+      hintAreaVisible = true;
+      document.querySelectorAll('.quiz-filter-btn').forEach(b => {
+        const v = b.dataset.filter;
+        b.classList.toggle('active', v === 'all' ? selectedQuizLevels.size === 5 : selectedQuizLevels.has(v));
+      });
+      document.getElementById('quizOverlay').classList.add('is-open');
+      startQuiz();
+    }
+    function handleCloseQuiz() {
+      document.getElementById('quizOverlay').classList.remove('is-open');
+      document.getElementById('flashcard').classList.remove('is-flipped');
+    }
+    function handleFlipCard() { document.getElementById('flashcard').classList.toggle('is-flipped'); }
+    function handleNextCard() {
+      if (currentQuizIndex < quizDeck.length - 1) {
+        currentQuizIndex++;
+        document.getElementById('flashcard').classList.remove('is-flipped');
+        updateQuizUI();
+      }
+    }
+    function handlePrevCard() {
+      if (currentQuizIndex > 0) {
+        currentQuizIndex--;
+        document.getElementById('flashcard').classList.remove('is-flipped');
+        updateQuizUI();
+      }
+    }
+
+    /* ────────────────────────────────────────
+       12. PRONUNCIATION
+    ──────────────────────────────────────── */
+    function speakWord(word) {
+      if (!('speechSynthesis' in window)) return showToast('Speech not supported on this browser.');
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(word);
+      utter.lang = 'en-US'; utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
+    }
+    function pronounceWord(event) {
+      event.stopPropagation();
+      const word = document.getElementById('flashcardWord').textContent;
+      if (word && word !== '—' && word !== 'Empty') speakWord(word);
+    }
+    function pronounceCard(event, word) {
+      event.stopPropagation();
+      speakWord(word);
+    }
+
+    /* ────────────────────────────────────────
+       13. UI HELPERS
+    ──────────────────────────────────────── */
+    function handleOpenModal() {
+      editingId = null; pendingTags = []; renderPendingTags();
+      document.getElementById('modalTitle').textContent    = 'Add New Word';
+      document.getElementById('inputWord').value           = '';
+      document.getElementById('inputDefinition').value     = '';
+      document.getElementById('inputExample').value        = '';
+      document.getElementById('tagTextInput').value        = '';
+      handleLevelSelect(1);
+      
+      const tagDatalist = document.getElementById('existingTagsList');
+      tagDatalist.innerHTML = getAllTags(getAllWords()).map(t => `<option value="${escapeHtml(t)}">`).join('');
+      
+      document.getElementById('modalBackdrop').classList.add('is-open');
+      syncAllFieldClears();
+      setTimeout(() => document.getElementById('inputWord').focus(), 100);
+    }
+    function handleCloseModal() { document.getElementById('modalBackdrop').classList.remove('is-open'); }
+
+    /* ── UNIVERSAL SORT ── */
+    function setSortType(type) {
+      sortType = type;
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === type));
+      renderDashboard();
+    }
+    function toggleSortDir() {
+      sortAsc = !sortAsc;
+      document.getElementById('sortDirBtn').textContent = sortAsc ? '↑' : '↓';
+      document.getElementById('sortDirBtn').title = sortAsc ? 'Ascending' : 'Descending';
+      renderDashboard();
+    }
+
+    /* ── HIDE / SHOW HINT ── */
+    function toggleHintArea() {
+      hintAreaVisible = !hintAreaVisible;
+      document.getElementById('quizHintArea').style.display = hintAreaVisible ? 'block' : 'none';
+      document.getElementById('btnRevealHint').style.display = hintAreaVisible ? 'none' : 'flex';
+      // Reset MC options when hiding
+      if (!hintAreaVisible) {
+        document.getElementById('mcOptions').classList.remove('visible');
+        document.getElementById('mcOptions').innerHTML = '';
+        document.getElementById('btnShowOptions').style.display = 'flex';
+      }
+    }
+
+    /* ── DEFINITION LINES SETTING ── */
+    function setDefLines(n) {
+      defLinesLimit = n;
+      localStorage.setItem(DEF_LINES_KEY, n.toString());
+      document.querySelectorAll('.def-line-btn').forEach(b => b.classList.toggle('selected', parseInt(b.dataset.lines) === n));
+      renderDashboard();
+    }
+    function initDefLinesPicker() {
+      document.querySelectorAll('.def-line-btn').forEach(b => b.classList.toggle('selected', parseInt(b.dataset.lines) === defLinesLimit));
+    }
+
+    /* ── WORD DETAIL MODAL ── */
+    function openWordDetail(wordId, event) {
+      if (event) event.stopPropagation();
+      const word = getAllWords().find(w => w.id === wordId); if (!word) return;
+      const lvlColors = ['lvl0','lvl1','lvl2','lvl3','lvl4','lvl5','lvl6','lvl7'];
+      const lvlNum = word.level || 0;
+      const lvlName = lvlNum === 0 ? 'Inbox' : (lvlNum === 7 ? 'Archive' : `Level ${lvlNum}`);
+      const badgeBg  = `var(--${lvlColors[lvlNum]}-bg)`;
+      const badgeCol = `var(--${lvlColors[lvlNum]}-hue)`;
+
+      const tagsHtml = (word.tags||[]).length
+        ? `<hr class="word-detail-divider"><div class="word-detail-section-label">Tags</div><div class="word-detail-tags">${word.tags.map(t=>`<span class="word-tag" style="font-size:0.78rem;padding:3px 12px;">${escapeHtml(t)}</span>`).join('')}</div>`
+        : '';
+      const sourceHtml = word.source
+        ? `<hr class="word-detail-divider"><div class="word-detail-section-label">Source</div><div class="word-detail-example" style="font-style:normal;">📖 ${escapeHtml(word.source)}</div>`
+        : '';
+      const exHtml = word.example
+        ? `<hr class="word-detail-divider"><div class="word-detail-section-label">Example</div><div class="word-detail-example">${escapeHtml(word.example)}</div>`
+        : '';
+      const defHtml = word.definition
+        ? `<hr class="word-detail-divider"><div class="word-detail-section-label">Definition</div><div class="word-detail-def">${escapeHtml(word.definition)}</div>`
+        : `<hr class="word-detail-divider"><div class="word-detail-def" style="font-style:italic;color:var(--text-muted);">No definition yet — tap Edit to add one.</div>`;
+
+      document.getElementById('detailModalHeading').textContent = word.word;
+      document.getElementById('wordDetailBody').innerHTML = `
+        <span class="word-detail-badge" style="background:${badgeBg};color:${badgeCol};">${lvlName}</span>
+        <button class="btn-pronounce" style="font-size:1.1rem;margin-left:0.4rem;" onclick="speakWord('${escapeHtml(word.word)}')" title="Pronounce">🔊</button>
+        ${defHtml}${exHtml}${tagsHtml}${sourceHtml}`;
+      document.getElementById('detailEditBtn').onclick = () => { closeWordDetail(); openEditModal(word.id); };
+      document.getElementById('wordDetailBackdrop').classList.add('is-open');
+    }
+    function closeWordDetail() { document.getElementById('wordDetailBackdrop').classList.remove('is-open'); }
+
+    function handleOpenSettings() {
+      initDefLinesPicker();
+      document.getElementById('settingsModal').classList.add('is-open');
+    }
+    function handleBackdropClick(e, id) { if (e.target === document.getElementById(id)) document.getElementById(id).classList.remove('is-open'); }
+    function handleLevelSelect(level) {
+      selectedLevel = level;
+      document.querySelectorAll('.level-btn').forEach(b => b.classList.toggle('selected', parseInt(b.dataset.lvl) === level));
+    }
+    function showToast(msg) {
+      const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+
+    /* ────────────────────────────────────────
+       FEATURE 2a — RESET/CLEAR MODAL FIELDS
+    ──────────────────────────────────────── */
+    function updateFieldClear(inputId, wrapId) {
+      const el = document.getElementById(inputId);
+      const wrap = document.getElementById(wrapId);
+      if (!el || !wrap) return;
+      wrap.classList.toggle('has-value', el.value.length > 0);
+    }
+    function clearField(inputId, wrapId) {
+      const el = document.getElementById(inputId);
+      if (!el) return;
+      el.value = '';
+      updateFieldClear(inputId, wrapId);
+      el.focus();
+    }
+    function syncAllFieldClears() {
+      updateFieldClear('inputWord',       'wordWrap');
+      updateFieldClear('inputDefinition', 'defWrap');
+      updateFieldClear('inputExample',    'exWrap');
+      updateFieldClear('inputSource',     'sourceWrap');
+    }
+    function resetModalFields() {
+      document.getElementById('inputWord').value       = '';
+      document.getElementById('inputDefinition').value = '';
+      document.getElementById('inputExample').value    = '';
+      document.getElementById('inputSource').value     = '';
+      syncAllFieldClears();
+      document.getElementById('inputWord').focus();
+    }
+
+    /* ────────────────────────────────────────
+       FEATURE 2b — RESET WORD TO LEVEL 1
+    ──────────────────────────────────────── */
+    function resetWordToLevel1() {
+      const heading = document.getElementById('detailModalHeading').textContent;
+      const words   = getAllWords();
+      const idx     = words.findIndex(w => w.word === heading);
+      if (idx === -1) return;
+      if (!confirm(`Reset "${words[idx].word}" back to Level 1?`)) return;
+      words[idx].level        = 1;
+      words[idx].dateModified = Date.now();
+      saveWordStore(words);
+      renderDashboard();
+      closeWordDetail();
+      showToast(`"${words[idx].word}" reset to Level 1.`);
+    }
+
+    /* ────────────────────────────────────────
+       FEATURE 3 — IMPORT FRIEND'S VOCABULARY
+    ──────────────────────────────────────── */
+    function importFriendData(event) {
+      const file = event.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!Array.isArray(imported)) throw new Error('Not an array');
+          const current     = getAllWords();
+          const existingSet = new Set(current.map(w => w.word.toLowerCase().trim()));
+          const now         = Date.now();
+          let added         = 0;
+
+          imported.forEach((w, i) => {
+            const wordStr = (w.word || '').trim();
+            if (!wordStr) return;
+            if (existingSet.has(wordStr.toLowerCase())) return; // skip duplicate
+            current.push({
+              id:           (now + i).toString(),
+              word:         wordStr,
+              definition:   w.definition || '',
+              example:      w.example    || '',
+              tags:         Array.isArray(w.tags) ? w.tags : [],
+              level:        1,   // Force Level 1 — ignore friend's SRS history
+              dateAdded:    now + i,
+              dateModified: now + i
+            });
+            existingSet.add(wordStr.toLowerCase());
+            added++;
+          });
+
+          saveWordStore(current);
+          renderDashboard();
+          showToast(`Imported ${added} new word${added !== 1 ? 's' : ''} from friend's list!`);
+          document.getElementById('settingsModal').classList.remove('is-open');
+        } catch { showToast('Error reading file — make sure it is a valid Lexicon JSON backup.'); }
+      };
+      reader.readAsText(file); event.target.value = '';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { handleCloseModal(); handleCloseQuiz(); closeWordDetail(); document.getElementById('settingsModal').classList.remove('is-open'); }
+    });
+
+    document.addEventListener('click', e => {
+      const overlay = document.getElementById('searchResults');
+      const wrap    = document.getElementById('searchInput');
+      if (!overlay.contains(e.target) && e.target !== wrap) overlay.classList.remove('visible');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      renderDashboard();
+      switchDashboardLevel(1);
+    });
+  </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js')
+    .then(() => console.log('Service Worker Registered'));
+}
+</script>
+</body>
+</html>

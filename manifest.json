@@ -1,0 +1,21 @@
+{
+  "name": "Lexicon Vocabulary Tracker",
+  "short_name": "Lexicon",
+  "description": "Track, sort, and quiz your daily vocabulary.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F5F2ED",
+  "theme_color": "#C4633A",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
