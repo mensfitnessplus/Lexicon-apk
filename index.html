@@ -337,6 +337,32 @@
     .btn-pronounce:hover { color: var(--accent); transform: scale(1.15); }
     .flashcard-pronounce { position: absolute; top: 1.2rem; right: 1.5rem; }
 
+    /* ── PRONUNCIATION LOADING SPINNER ── */
+    /* Spin keyframes for the loading indicator on slow TTS init */
+    @keyframes tts-spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    /* The spinner icon shown when TTS init takes > 100ms */
+    .btn-pronounce.tts-loading {
+      color: var(--accent);
+      cursor: wait;
+      pointer-events: none; /* prevent double-tap while loading */
+    }
+    .btn-pronounce.tts-loading::after {
+      content: '';
+      display: inline-block;
+      width: 0.9em;
+      height: 0.9em;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: tts-spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+    /* Hide the emoji content while the spinner pseudo-element is showing */
+    .btn-pronounce.tts-loading .tts-icon { visibility: hidden; width: 0; overflow: hidden; }
+
     /* ── TAGS ── */
     .tag-input-wrap { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 7px 10px; cursor: text; transition: var(--transition); }
     .tag-input-wrap:focus-within { border-color: var(--accent); }
@@ -383,6 +409,89 @@
     /* ── TOAST ── */
     .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-primary); color: var(--bg); font-size: 0.85rem; font-weight: 500; padding: 10px 20px; border-radius: var(--radius-md); z-index: 999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; text-align: center; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── BACKUP REMINDER BANNER ── */
+    .backup-reminder-banner {
+      display: none;
+      position: relative;
+      max-width: 1400px;
+      margin: 1rem 2rem 0;
+      background: var(--surface);
+      border: 1.5px solid var(--lvl4-hue);
+      border-radius: var(--radius-lg);
+      padding: 0.9rem 1.2rem;
+      z-index: 80;
+      animation: fadeIn 0.4s;
+      overflow: hidden;
+    }
+    .backup-reminder-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--lvl4-bg) 0%, transparent 70%);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .backup-reminder-banner.visible { display: flex; align-items: flex-start; gap: 1rem; }
+    .backup-reminder-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+    .backup-reminder-content { flex: 1; min-width: 0; position: relative; }
+    .backup-reminder-title {
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+    .backup-reminder-text {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 0.65rem;
+    }
+    .backup-reminder-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn-backup-now {
+      padding: 7px 16px;
+      background: var(--lvl4-hue);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-backup-now:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-remind-later {
+      padding: 7px 14px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-remind-later:hover { background: var(--surface-alt); color: var(--text-primary); }
+    .btn-backup-dismiss {
+      position: absolute;
+      top: 0; right: 0;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      transition: var(--transition);
+    }
+    .btn-backup-dismiss:hover { background: var(--surface-alt); color: var(--text-primary); }
+    @media (max-width: 720px) {
+      .backup-reminder-banner { margin: 0.75rem 1.25rem 0; padding: 0.8rem 1rem; }
+    }
 
     /* ── MOBILE OPTIMIZATIONS ── */
     @media (max-width: 720px) {
@@ -545,6 +654,20 @@
           <input type="file" id="importFriendFile" accept=".json" onchange="importFriendData(event)">
         </div>
       </div>
+
+      <!-- ── DATA & BACKUPS: FOLDER BACKUP ── -->
+      <div class="settings-option">
+        <p><strong>Data &amp; Backups — Folder Backup</strong><br>Select a folder on your device and save backups directly to it. Useful for automatic organisation without choosing a location each time.</p>
+        <button class="btn-primary" onclick="BackupFolderEngine.selectFolder()" style="margin-bottom:0.5rem;">📁 Select Backup Folder</button>
+        <div id="backupFolderStatus" style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.75rem;">No backup folder selected</div>
+        <button class="btn-primary" onclick="BackupFolderEngine.saveToFolder()" style="background:var(--lvl1-hue);">💾 Save Backup To Folder</button>
+      </div>
+
+      <!-- ── RECENT BACKUPS ── -->
+      <div class="settings-option" id="recentBackupsSection" style="display:none;">
+        <p><strong>Recent Backups</strong></p>
+        <div id="recentBackupsList" style="font-size:0.82rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:0.35rem;"></div>
+      </div>
     </div>
   </div>
 
@@ -555,6 +678,20 @@
       <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
     </div>
     <div class="search-results-overlay" id="searchResults"></div>
+  </div>
+
+  <!-- ── BACKUP REMINDER BANNER ── -->
+  <div class="backup-reminder-banner" id="backupReminderBanner">
+    <div class="backup-reminder-icon">🗂️</div>
+    <div class="backup-reminder-content">
+      <button class="btn-backup-dismiss" onclick="dismissBackupReminder()" title="Dismiss">✕</button>
+      <div class="backup-reminder-title">Your vocabulary deserves a backup</div>
+      <div class="backup-reminder-text">It's been a while since your last backup. A quick export keeps your word collection safe — it only takes a second and works completely offline.</div>
+      <div class="backup-reminder-actions">
+        <button class="btn-backup-now" onclick="backupNowFromBanner()">⬇️ Back Up Now</button>
+        <button class="btn-remind-later" onclick="remindBackupLater()">Remind Me Tomorrow</button>
+      </div>
+    </div>
   </div>
 
   <div class="wotd-banner" id="wotdBanner" style="display:none;">
@@ -675,7 +812,7 @@
         <div class="flashcard" id="flashcard">
           <div class="flashcard-face flashcard-front">
             <span class="flashcard-level-badge" id="flashcardLevelBadge">Level —</span>
-            <button class="btn-pronounce flashcard-pronounce" id="flashcardPronounceBtn" onclick="pronounceWord(event)" title="Pronounce">🔊</button>
+            <button class="btn-pronounce flashcard-pronounce" id="flashcardPronounceBtn" onclick="pronounceWord(event)" title="Pronounce"><span class="tts-icon">🔊</span></button>
             <p class="flashcard-hint">Tap to reveal definition</p>
             <h2 class="flashcard-word" id="flashcardWord">—</h2>
           </div>
@@ -808,6 +945,9 @@
       const a    = document.createElement('a');
       a.href = url; a.download = `lexicon_backup_${new Date().toISOString().split('T')[0]}.json`;
       a.click(); URL.revokeObjectURL(url);
+      // Record successful backup timestamp
+      localStorage.setItem('lexicon_last_backup', Date.now().toString());
+      hideBackupReminder();
       showToast('Backup downloaded!');
     }
     
@@ -1316,7 +1456,7 @@ const tagsHtml = (item.tags||[]).length ? `<div class="word-card-tags">${item.ta
               <div class="word-card-word">
                 ${escapeHtml(item.word)}
                 ${badgeHtml}
-                <button class="btn-pronounce" onclick="pronounceCard(event, '${escapeHtml(item.word)}')" title="Pronounce">🔊</button>
+                <button class="btn-pronounce" onclick="pronounceCard(event, '${escapeHtml(item.word)}')" title="Pronounce"><span class="tts-icon">🔊</span></button>
               </div>
               ${defHtml}
               ${exHtml}${tagsHtml}${sourceHtml}
@@ -1515,23 +1655,157 @@ const tagsHtml = (item.tags||[]).length ? `<div class="word-card-tags">${item.ta
     }
 
     /* ────────────────────────────────────────
-       12. PRONUNCIATION
+       12. PRONUNCIATION (TTS)
+       - Voices are preloaded at startup and cached globally.
+       - Local (offline) English voices are preferred; falls back
+         gracefully to any English voice, then browser default.
+       - A 100ms delay guard prevents a spinner from flashing on
+         fast devices; it only appears when TTS init is slow.
+       - Any ongoing speech is cancelled before a new utterance
+         starts, preventing overlapping audio.
+       - Buttons cannot get stuck in loading state: onstart,
+         onerror, and a 5s safety timeout all restore the icon.
     ──────────────────────────────────────── */
-    function speakWord(word) {
-      if (!('speechSynthesis' in window)) return showToast('Speech not supported on this browser.');
+
+    // Global voice cache — populated on startup and whenever the
+    // browser fires onvoiceschanged (needed for async voice loading).
+    let _ttsVoices = [];
+
+    function _loadVoices() {
+      const v = window.speechSynthesis.getVoices();
+      if (v && v.length > 0) _ttsVoices = v;
+    }
+
+    // Preload voices as early as possible.
+    if ('speechSynthesis' in window) {
+      _loadVoices();
+      // Browsers (especially Chrome) load voices asynchronously;
+      // onvoiceschanged fires once they are ready.
+      window.speechSynthesis.onvoiceschanged = _loadVoices;
+    }
+
+    /**
+     * Pick the best available English voice.
+     * Priority: local English > any English > browser default (null).
+     */
+    function _pickEnglishVoice() {
+      const voices = _ttsVoices.length ? _ttsVoices : window.speechSynthesis.getVoices();
+      if (!voices.length) return null;
+
+      // 1. Prefer local (offline-capable) English voices
+      const localEn = voices.filter(v => v.localService && /^en/i.test(v.lang));
+      if (localEn.length) return localEn[0];
+
+      // 2. Fall back to any English voice (may be cloud-based)
+      const anyEn = voices.filter(v => /^en/i.test(v.lang));
+      if (anyEn.length) return anyEn[0];
+
+      // 3. Last resort: whatever the browser defaults to
+      return null;
+    }
+
+    /**
+     * Show the loading spinner on a pronounce button.
+     * Stores original HTML so it can be restored exactly.
+     */
+    function _setButtonLoading(btn) {
+      if (!btn || btn.dataset.ttsLoading) return;
+      btn.dataset.ttsLoading = '1';
+      btn.classList.add('tts-loading');
+    }
+
+    /**
+     * Restore a pronounce button to its normal (speaker icon) state.
+     */
+    function _clearButtonLoading(btn) {
+      if (!btn) return;
+      delete btn.dataset.ttsLoading;
+      btn.classList.remove('tts-loading');
+    }
+
+    /**
+     * Core speak function.
+     * @param {string} word        - The word to pronounce.
+     * @param {HTMLElement} [btn]  - The button that was tapped (optional).
+     *                               When provided, a loading spinner appears
+     *                               if TTS does not start within 100ms.
+     */
+    function speakWord(word, btn) {
+      if (!('speechSynthesis' in window)) {
+        return showToast('Speech not supported on this browser.');
+      }
+      if (!word || word === '—' || word === 'Empty') return;
+
+      // Cancel any currently playing speech to prevent overlap.
       window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(word);
-      utter.lang = 'en-US'; utter.rate = 0.9;
+
+      const utter  = new SpeechSynthesisUtterance(word);
+      utter.lang   = 'en-US';
+      utter.rate   = 0.9;
+
+      const voice  = _pickEnglishVoice();
+      if (voice) utter.voice = voice;
+
+      // ── Smart loading indicator ──────────────────────────────────
+      // Only show the spinner if speech hasn't started after 100ms,
+      // avoiding visual flicker on fast devices.
+      let spinnerTimer   = null;
+      let speechStarted  = false;
+      let safetyTimer    = null;
+
+      if (btn) {
+        spinnerTimer = setTimeout(() => {
+          if (!speechStarted) _setButtonLoading(btn);
+        }, 100);
+      }
+
+      utter.onstart = () => {
+        speechStarted = true;
+        clearTimeout(spinnerTimer);
+        if (btn) _clearButtonLoading(btn);
+
+        // Safety timeout: if onend never fires, restore after 5s
+        safetyTimer = setTimeout(() => {
+          if (btn) _clearButtonLoading(btn);
+        }, 5000);
+      };
+
+      utter.onend = () => {
+        clearTimeout(safetyTimer);
+        if (btn) _clearButtonLoading(btn);
+      };
+
+      utter.onerror = () => {
+        clearTimeout(spinnerTimer);
+        clearTimeout(safetyTimer);
+        if (btn) _clearButtonLoading(btn);
+      };
+
       window.speechSynthesis.speak(utter);
     }
+
+    /**
+     * Pronunciation handler for the flashcard button.
+     * Passes the button element so the loading spinner can be managed.
+     */
     function pronounceWord(event) {
       event.stopPropagation();
-      const word = document.getElementById('flashcardWord').textContent;
-      if (word && word !== '—' && word !== 'Empty') speakWord(word);
+      const word = document.getElementById('flashcardWord').textContent.trim();
+      const btn  = document.getElementById('flashcardPronounceBtn');
+      speakWord(word, btn);
     }
+
+    /**
+     * Pronunciation handler for word cards in the dashboard.
+     * The button element is retrieved from the event target so that
+     * each card's own button manages its own loading state independently.
+     */
     function pronounceCard(event, word) {
       event.stopPropagation();
-      speakWord(word);
+      // Walk up to the actual .btn-pronounce in case the click landed
+      // on a child element (e.g. the .tts-icon span).
+      const btn = event.target.closest('.btn-pronounce');
+      speakWord(word, btn || null);
     }
 
     /* ────────────────────────────────────────
@@ -1618,7 +1892,7 @@ const tagsHtml = (item.tags||[]).length ? `<div class="word-card-tags">${item.ta
       document.getElementById('detailModalHeading').textContent = word.word;
       document.getElementById('wordDetailBody').innerHTML = `
         <span class="word-detail-badge" style="background:${badgeBg};color:${badgeCol};">${lvlName}</span>
-        <button class="btn-pronounce" style="font-size:1.1rem;margin-left:0.4rem;" onclick="speakWord('${escapeHtml(word.word)}')" title="Pronounce">🔊</button>
+        <button class="btn-pronounce" style="font-size:1.1rem;margin-left:0.4rem;" onclick="speakWord('${escapeHtml(word.word)}', this)" title="Pronounce"><span class="tts-icon">🔊</span></button>
         ${defHtml}${exHtml}${tagsHtml}${sourceHtml}`;
       document.getElementById('detailEditBtn').onclick = () => { closeWordDetail(); openEditModal(word.id); };
       document.getElementById('wordDetailBackdrop').classList.add('is-open');
@@ -1742,10 +2016,252 @@ const tagsHtml = (item.tags||[]).length ? `<div class="word-card-tags">${item.ta
       if (!overlay.contains(e.target) && e.target !== wrap) overlay.classList.remove('visible');
     });
 
+    /* ────────────────────────────────────────
+       BACKUP REMINDER SYSTEM
+    ──────────────────────────────────────── */
+    const BACKUP_LAST_KEY   = 'lexicon_last_backup';
+    const BACKUP_SNOOZE_KEY = 'lexicon_backup_snooze';
+    const BACKUP_INTERVAL   = 7 * 24 * 60 * 60 * 1000;  // 7 days in ms
+    const BACKUP_SNOOZE_DUR = 24 * 60 * 60 * 1000;      // 24 hours in ms
+
+    function checkBackupReminder() {
+      const words = getAllWords();
+      if (!words.length) return; // No words yet — nothing to back up
+
+      const snoozeUntil = parseInt(localStorage.getItem(BACKUP_SNOOZE_KEY) || '0');
+      if (Date.now() < snoozeUntil) return; // Snoozed
+
+      const lastBackup = parseInt(localStorage.getItem(BACKUP_LAST_KEY) || '0');
+      const neverBacked = lastBackup === 0;
+      const overdue     = (Date.now() - lastBackup) > BACKUP_INTERVAL;
+
+      if (neverBacked || overdue) {
+        document.getElementById('backupReminderBanner').classList.add('visible');
+      }
+    }
+
+    function hideBackupReminder() {
+      document.getElementById('backupReminderBanner').classList.remove('visible');
+    }
+
+    function dismissBackupReminder() {
+      hideBackupReminder();
+      // Snooze for 24h so it won't immediately re-appear on next visit
+      localStorage.setItem(BACKUP_SNOOZE_KEY, (Date.now() + BACKUP_SNOOZE_DUR).toString());
+    }
+
+    function remindBackupLater() {
+      hideBackupReminder();
+      localStorage.setItem(BACKUP_SNOOZE_KEY, (Date.now() + BACKUP_SNOOZE_DUR).toString());
+      showToast('We\'ll remind you tomorrow.');
+    }
+
+    async function backupNowFromBanner() {
+      // If a backup folder is configured, route through it (handles permission
+      // recovery and history logging). Otherwise fall back to a plain download.
+      if (await BackupFolderEngine.hasFolder()) {
+        await BackupFolderEngine.saveToFolder();
+      } else {
+        exportData(); // exportData() already records timestamp + hides banner
+      }
+    }
+
+    /* ────────────────────────────────────────
+       BACKUP FOLDER ENGINE
+    ──────────────────────────────────────── */
+    const BackupFolderEngine = (() => {
+      const IDB_NAME    = 'lexicon_backup_db';
+      const IDB_VERSION = 1;
+      const STORE_NAME  = 'settings';
+      const HANDLE_KEY  = 'backupFolderHandle';
+      const HISTORY_KEY = 'backupHistory';
+      const MAX_HISTORY = 20;
+
+      /* ── IndexedDB helpers ── */
+      function openDB() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+          req.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME);
+          req.onsuccess  = e => resolve(e.target.result);
+          req.onerror    = e => reject(e.target.error);
+        });
+      }
+
+      async function idbGet(key) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx  = db.transaction(STORE_NAME, 'readonly');
+          const req = tx.objectStore(STORE_NAME).get(key);
+          req.onsuccess = e => resolve(e.target.result ?? null);
+          req.onerror   = e => reject(e.target.error);
+        });
+      }
+
+      async function idbSet(key, value) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx  = db.transaction(STORE_NAME, 'readwrite');
+          const req = tx.objectStore(STORE_NAME).put(value, key);
+          req.onsuccess = () => resolve();
+          req.onerror   = e => reject(e.target.error);
+        });
+      }
+
+      /* ── Backup data (same as exportData) ── */
+      function getBackupBlob() {
+        const words = getAllWords();
+        return { words, blob: new Blob([JSON.stringify(words, null, 2)], { type: 'application/json' }) };
+      }
+
+      function buildFilename() {
+        const now  = new Date();
+        const pad  = n => String(n).padStart(2, '0');
+        return `workout-backup-${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}-${pad(now.getHours())}-${pad(now.getMinutes())}.json`;
+      }
+
+      /* ── History ── */
+      async function loadHistory() {
+        return (await idbGet(HISTORY_KEY)) || [];
+      }
+
+      async function pushHistory(filename) {
+        let hist = await loadHistory();
+        hist.unshift({ filename, createdAt: Date.now() });
+        if (hist.length > MAX_HISTORY) hist = hist.slice(0, MAX_HISTORY);
+        await idbSet(HISTORY_KEY, hist);
+        renderHistory(hist);
+      }
+
+      function renderHistory(hist) {
+        const section = document.getElementById('recentBackupsSection');
+        const list    = document.getElementById('recentBackupsList');
+        if (!hist || !hist.length) { section.style.display = 'none'; return; }
+        section.style.display = '';
+        list.innerHTML = hist.map(entry => {
+          const d = new Date(entry.createdAt);
+          const formatted = d.toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+          return `<div style="display:flex;flex-direction:column;padding:0.4rem 0;border-bottom:1px solid var(--border);">
+            <span style="font-weight:600;color:var(--text-primary);font-size:0.8rem;">${escapeHtml(entry.filename)}</span>
+            <span style="font-size:0.75rem;color:var(--text-muted);">${formatted}</span>
+          </div>`;
+        }).join('');
+      }
+
+      /* ── Folder status UI ── */
+      function updateFolderStatus(name) {
+        const el = document.getElementById('backupFolderStatus');
+        if (!el) return;
+        el.textContent = name ? `Backup folder: ${name}` : 'No backup folder selected';
+      }
+
+      /* ── Permission verification ── */
+      async function verifyPermission(handle) {
+        if (!handle) return false;
+        try {
+          let perm = await handle.queryPermission({ mode: 'readwrite' });
+          if (perm === 'granted') return true;
+          perm = await handle.requestPermission({ mode: 'readwrite' });
+          return perm === 'granted';
+        } catch { return false; }
+      }
+
+      /* ── Write file to folder ── */
+      async function writeToHandle(handle, filename, blob) {
+        const fileHandle = await handle.getFileHandle(filename, { create: true });
+        const writable   = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      }
+
+      /* ── Public: selectFolder ── */
+      async function selectFolder() {
+        if (typeof window.showDirectoryPicker !== 'function') {
+          alert('Your browser does not support folder access. Use Export Backup instead.');
+          return;
+        }
+        try {
+          const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+          await idbSet(HANDLE_KEY, handle);
+          updateFolderStatus(handle.name);
+          showToast(`Folder selected: ${handle.name}`);
+        } catch (err) {
+          if (err.name !== 'AbortError') showToast('Could not access the selected folder.');
+        }
+      }
+
+      /* ── Public: saveToFolder ── */
+      async function saveToFolder() {
+        const { words, blob } = getBackupBlob();
+        if (!words.length) { showToast('No words to back up.'); return; }
+
+        const filename = buildFilename();
+
+        async function attemptWrite() {
+          const handle = await idbGet(HANDLE_KEY);
+          if (!handle) { showToast('Please select a backup folder first.'); return false; }
+          const hasPerm = await verifyPermission(handle);
+          if (!hasPerm) throw new Error('permission_denied');
+          await writeToHandle(handle, filename, blob);
+          return true;
+        }
+
+        try {
+          const ok = await attemptWrite();
+          if (ok) {
+            await pushHistory(filename);
+            localStorage.setItem('lexicon_last_backup', Date.now().toString());
+            hideBackupReminder();
+            showToast(`Saved: ${filename}`);
+          }
+        } catch (err) {
+          // Permission was lost — ask user to reselect
+          alert('Backup folder access was lost. Please select the folder again.');
+          try {
+            await selectFolder();
+            const retryOk = await attemptWrite();
+            if (retryOk) {
+              await pushHistory(filename);
+              localStorage.setItem('lexicon_last_backup', Date.now().toString());
+              hideBackupReminder();
+              showToast(`Saved: ${filename}`);
+            }
+          } catch (retryErr) {
+            // Final fallback — download via existing exportData
+            exportData();
+            showToast('Folder backup unavailable. Backup was downloaded instead.');
+          }
+        }
+      }
+
+      /* ── Init: restore folder name and history on load ── */
+      async function init() {
+        try {
+          const handle = await idbGet(HANDLE_KEY);
+          if (handle) updateFolderStatus(handle.name);
+        } catch { /* IndexedDB unavailable */ }
+        try {
+          const hist = await loadHistory();
+          if (hist && hist.length) renderHistory(hist);
+        } catch { /* ignore */ }
+      }
+
+      /* ── hasFolder: true if a directory handle is loaded ── */
+      async function hasFolder() {
+        try {
+          const handle = await idbGet(HANDLE_KEY);
+          return !!handle;
+        } catch { return false; }
+      }
+
+      return { selectFolder, saveToFolder, hasFolder, init };
+    })();
+
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
       renderDashboard();
       switchDashboardLevel(1);
+      checkBackupReminder();
+      BackupFolderEngine.init();
     });
   </script>
   <script>
