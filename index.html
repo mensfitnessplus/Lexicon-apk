@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" id="metaThemeColor" content="#FDFBF8">
   <title>Lexicon — Vocabulary Tracker</title>
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -942,6 +943,13 @@
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem(THEME_KEY, newTheme);
       document.getElementById('themeToggleBtn').textContent = themeIcons[currentThemeIndex];
+
+      const metaThemeColor = document.getElementById('metaThemeColor');
+      if (metaThemeColor) {
+        if (newTheme === 'light') metaThemeColor.setAttribute('content', '#FDFBF8');
+        if (newTheme === 'dark') metaThemeColor.setAttribute('content', '#334155');
+        if (newTheme === 'amoled') metaThemeColor.setAttribute('content', '#0A0A0A');
+      }
     }
 
     /* ────────────────────────────────────────

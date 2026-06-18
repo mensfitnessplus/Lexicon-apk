@@ -1,4 +1,4 @@
-const CACHE_NAME = "lexicon-v1.2";
+const CACHE_NAME = "lexicon-v1.3";
 
 const urlsToCache = [
   "./",
