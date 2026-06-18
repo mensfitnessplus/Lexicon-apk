@@ -42,13 +42,13 @@
     }
 
     [data-theme="dark"] {
-      --bg:           #141210;
-      --surface:      #1E1A17;
-      --surface-alt:  #2C2621;
-      --border:       #3A332C;
-      --text-primary: #F5F2ED;
-      --text-secondary:#BDB8AF;
-      --text-muted:   #8A847C;
+      --bg:           #1E293B;
+      --surface:      #334155;
+      --surface-alt:  #475569;
+      --border:       #64748B;
+      --text-primary: #F8FAFC;
+      --text-secondary:#CBD5E1;
+      --text-muted:   #94A3B8;
       --lvl0-bg: rgba(140,130,115,0.15);
       --lvl1-bg: rgba(74,140,111,0.15);
       --lvl2-bg: rgba(91,127,166,0.15);
@@ -407,7 +407,7 @@
     .word-detail-actions .btn-save { flex: 2; }
 
     /* ── TOAST ── */
-    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-primary); color: var(--bg); font-size: 0.85rem; font-weight: 500; padding: 10px 20px; border-radius: var(--radius-md); z-index: 999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; text-align: center; white-space: nowrap; }
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface); color: var(--text-primary); border: 1.5px solid var(--accent); box-shadow: var(--shadow-lg); font-size: 0.85rem; font-weight: 600; padding: 10px 20px; border-radius: var(--radius-md); z-index: 999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; text-align: center; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ── BACKUP REMINDER BANNER ── */
@@ -537,7 +537,7 @@
     </div>
   </header>
 
-  <button class="fab-add" onclick="handleOpenModal()" aria-label="Add Word">
+  <button class="fab-add" onmousedown="handleFabDown(event)" onmouseup="handleFabUp(event)" onmouseleave="handleFabCancel()" ontouchstart="handleFabDown(event)" ontouchend="handleFabUp(event)" ontouchcancel="handleFabCancel()" oncontextmenu="event.preventDefault()" aria-label="Add Word">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
 
@@ -657,6 +657,22 @@
 
       <!-- ── DATA & BACKUPS: FOLDER BACKUP ── -->
       <div class="settings-option">
+        <p><strong>AI Bulk Import Format (Hidden Feature)</strong><br>Long-press the main <strong>+</strong> button on the home screen to instantly import words from your clipboard. The clipboard text must match this exact JSON array format:</p>
+        <div style="position:relative;">
+          <pre style="background: var(--surface-alt); padding: 0.8rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.7rem; color: var(--text-secondary); overflow-x: auto; white-space: pre-wrap; word-break: break-all; border: 1px solid var(--border);">[
+  {
+    "word": "Fickle",
+    "definition": "Meaning: Frequently changing opinions...
+
+[Adjective]",
+    "example": "He is so fickle..."
+  }
+]</pre>
+          <button class="btn-primary" onclick="copyBulkFormat()" style="margin-top: 0.5rem; width: 100%; font-size: 0.8rem; background: var(--lvl3-hue);">📋 Copy Full Format</button>
+        </div>
+      </div>
+
+      <div class="settings-option">
         <p><strong>Data &amp; Backups — Folder Backup</strong><br>Select a folder on your device and save backups directly to it. Useful for automatic organisation without choosing a location each time.</p>
         <button class="btn-primary" onclick="BackupFolderEngine.selectFolder()" style="margin-bottom:0.5rem;">📁 Select Backup Folder</button>
         <div id="backupFolderStatus" style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.75rem;">No backup folder selected</div>
@@ -727,7 +743,7 @@
     </div>
 
     <div class="level-grid single-view" id="levelGrid">
-      <div class="level-column" data-level="0"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Inbox (Needs Definition)</span></div><span class="column-count" id="count-0">0</span></div><div class="column-body" id="column-body-0"></div></div>
+      <div class="level-column" data-level="0"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Inbox (Needs Definition)</span><button onclick="copyInboxWords()" style="background:transparent; border:none; cursor:pointer; margin-left:8px; font-size:1rem; color:var(--text-muted); transition:var(--transition);" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'" title="Copy all inbox words">📋</button></div><span class="column-count" id="count-0">0</span></div><div class="column-body" id="column-body-0"></div></div>
       <div class="level-column active-view" data-level="1"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Level 1 Overview</span></div><span class="column-count" id="count-1">0</span></div><div class="column-body" id="column-body-1"></div></div>
       <div class="level-column" data-level="2"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Level 2 Overview</span></div><span class="column-count" id="count-2">0</span></div><div class="column-body" id="column-body-2"></div></div>
       <div class="level-column" data-level="3"><div class="column-header"><div class="column-header-left"><span class="level-dot"></span><span class="column-title">Level 3 Overview</span></div><span class="column-count" id="count-3">0</span></div><div class="column-body" id="column-body-3"></div></div>
@@ -1118,6 +1134,19 @@
     /* ────────────────────────────────────────
        6. CRUD & BULK ACTIONS
     ──────────────────────────────────────── */
+    function copyInboxWords() {
+      const inboxWords = getAllWords().filter(w => w.level === 0).map(w => w.word);
+      if (inboxWords.length === 0) return showToast('Inbox is empty.');
+      const textToCopy = inboxWords.join(', ');
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => showToast('Copied ' + inboxWords.length + ' words!'))
+          .catch(() => showToast('Failed to copy.'));
+      } else {
+        showToast('Clipboard access denied.');
+      }
+    }
+
     function handleSaveWord() {
       const wordText = document.getElementById('inputWord').value.trim();
       const defText  = document.getElementById('inputDefinition').value.trim();
@@ -1727,8 +1756,8 @@ const tagsHtml = (item.tags||[]).length ? `<div class="word-card-tags">${item.ta
      * Core speak function.
      * @param {string} word        - The word to pronounce.
      * @param {HTMLElement} [btn]  - The button that was tapped (optional).
-     *                               When provided, a loading spinner appears
-     *                               if TTS does not start within 100ms.
+     * When provided, a loading spinner appears
+     * if TTS does not start within 100ms.
      */
     function speakWord(word, btn) {
       if (!('speechSynthesis' in window)) {
@@ -2263,6 +2292,132 @@ const tagsHtml = (item.tags||[]).length ? `<div class="word-card-tags">${item.ta
       checkBackupReminder();
       BackupFolderEngine.init();
     });
+  
+    /* ────────────────────────────────────────
+       HIDDEN AI BULK IMPORT FEATURE
+    ──────────────────────────────────────── */
+    let fabPressTimer = null;
+    let isLongPress = false;
+    let fabActionHandled = false;
+
+    function handleFabDown(e) {
+      isLongPress = false;
+      fabPressTimer = setTimeout(() => {
+        isLongPress = true;
+        if (navigator.vibrate) navigator.vibrate(50);
+      }, 500); // Trigger after 500ms
+    }
+
+    function handleFabUp(e) {
+      clearTimeout(fabPressTimer);
+      // Prevent double firing from touch + mouse
+      if (fabActionHandled) return;
+      fabActionHandled = true;
+      setTimeout(() => fabActionHandled = false, 300);
+
+      if (isLongPress) {
+        if (e && e.cancelable) e.preventDefault();
+        handleHiddenBulkImport();
+        isLongPress = false;
+      } else {
+        if (e && e.cancelable) e.preventDefault();
+        handleOpenModal();
+      }
+    }
+
+    function handleFabCancel() {
+      clearTimeout(fabPressTimer);
+      isLongPress = false;
+    }
+
+    async function handleHiddenBulkImport() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (!text) {
+          showToast('Clipboard is empty.');
+          return;
+        }
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          showToast('Clipboard content is not valid JSON format.');
+          return;
+        }
+
+        if (!Array.isArray(data)) {
+          showToast('JSON must be an array of objects.');
+          return;
+        }
+
+        const validWords = data.filter(item => item.word && typeof item.word === 'string');
+        if (validWords.length === 0) {
+          showToast('No valid words found in JSON format.');
+          return;
+        }
+
+        if (confirm(`Do you want to add ${validWords.length} words from your clipboard to your Lexicon?`)) {
+          const words = getAllWords();
+          const now = Date.now();
+          let added = 0;
+
+          validWords.forEach((w, i) => {
+            const wordStr = w.word.trim();
+            // Avoid duplicates
+            if (!words.some(existing => existing.word.toLowerCase() === wordStr.toLowerCase())) {
+              words.push({
+                id: (now + i).toString(),
+                word: wordStr,
+                definition: (w.definition || '').trim(),
+                example: (w.example || '').trim(),
+                level: w.definition ? 1 : 0, 
+                tags: [],
+                dateAdded: now + i,
+                dateModified: now + i
+              });
+              added++;
+            }
+          });
+
+          if (added > 0) {
+            saveWordStore(words);
+            renderDashboard();
+            showToast(`Successfully added ${added} new words!`);
+          } else {
+            showToast('No new words to add (all already exist).');
+          }
+        }
+      } catch (err) {
+        console.error('Clipboard read failed:', err);
+        showToast('Could not read clipboard. Please ensure you have granted permission.');
+      }
+    }
+
+    function copyBulkFormat() {
+      const format = `[
+  {
+    "word":"Fickle",
+    "definition":"Meaning: Frequently changing opinions, feelings, decisions, or loyalties.\n\nPersonal Meaning: Like someone who is excited about a new hobby today, abandons it next week, and then becomes obsessed with something completely different.\n\n[Adjective]",
+    "example":"He is so fickle that he changes his mind about what he wants to do every few days."
+  },
+  {
+    "word":"Anecdote",
+    "definition":"Meaning: A short, interesting, or amusing story about a real event or experience.\n\nPersonal Meaning: Like telling your friends a quick story about something funny, embarrassing, or memorable that happened to you.\n\n[Noun]",
+    "example":"The teacher shared an anecdote from her college days to make the lesson more engaging."
+  }
+]`;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(format).then(() => {
+          showToast('AI Bulk Format copied to clipboard!');
+        }).catch(() => {
+          showToast('Failed to copy format.');
+        });
+      } else {
+        showToast('Clipboard access denied.');
+      }
+    }
+
   </script>
   <script>
 if ('serviceWorker' in navigator) {
